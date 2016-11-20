@@ -1,0 +1,28 @@
+<nav class="navbar navbar-inverse navbar-fixed-top">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">{{title}}</a>
+    <ul class="nav navbar-nav navbar-right ">
+      <li><a [routerLink]="['/overview']">Menu1</a></li>
+      <li><a [routerLink]="['/trading']">Menu2</a></li>
+      <li><a href="#">Profile</a></li>
+      <li><a href="# ">Help</a></li>
+    </ul>
+  </div>
+</nav>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-sm-3 col-md-2 sidebar">
+      <ul class="nav nav-sidebar">
+        <li [routerLinkActive]="['active']"><a [routerLink]="['/overview']">Overview<span class="sr-only">(current)</span></a></li>
+        <li [routerLinkActive]="['active']"><a [routerLink]="['/trading']">Trading</a></li>
+        <li [routerLinkActive]="['active']"><a [routerLink]="['/history']">History</a></li>
+      </ul>
+    </div>
+    <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+      <div class="alert alert-success" [hidden]='!visible'>
+        <strong>{{alertMsg || 'message'}}</strong>
+      </div>
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en" data-framework="angularjs">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    
+</head>
+
+<body >
+        <h1>Trading System</h1>
+        <div>
+            <input type="button" value="Login" onclick="kiwoom.login()"/>
+            <input type="button" value="Logout" onclick="kiwoom.quit()">
+            <input type="button" value="test" onclick="test()"/>
+            <div id="test">
+                <p>Test Area</p>
+                <p id="test"></p>
+            </div>
+        </div>
+        <script src="js/qwebchannel.js"></script>
+        <script>
+            new QWebChannel(qt.webChannelTransport, function(channel) {
+            var kiwoom = window.kiwoom = channel.objects.kiwoom;
+            var plist = window.plist = channel.objects.plist;
+            kiwoom.bridge.connect(function(event, data) {
+                console.info('< ' + event + ' > received from the server...');
+                document.getElementById("test").innerHTML = data
+                console.log(data)
+                
+            });
+            });
+            
+        </script>
+</body>
+
+</html>
