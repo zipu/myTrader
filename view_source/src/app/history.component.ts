@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonService } from './app.service';
-import { NgForm } from '@angular/common';
+//import { NgForm } from '@angular/common';
 import { Statement } from './prototypes';
 //var QWebChannel:any = require('../../public/js/qwebchannel.js').QWebChannel;
 

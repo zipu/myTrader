@@ -11,14 +11,14 @@ module.exports = {
   },
 
   resolve: {
-    extensions: ['', '.js', '.ts']
+    extensions: ['', '.ts', '.js']
   },
 
   module: {
     loaders: [
       {
         test: /\.ts$/,
-        loader: 'ts'
+        loaders: ['awesome-typescript-loader', 'angular2-template-loader']
       },
       {
         test: /\.html$/,
