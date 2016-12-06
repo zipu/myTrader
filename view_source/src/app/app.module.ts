@@ -10,6 +10,7 @@ import { OverviewComponent }   from './overview.component';
 import { TradingComponent }   from './trading.component';
 import { ChartComponent }   from './chart.component';
 import { HistoryComponent }   from './history.component';
+import { RecordComponent }   from './record.component';
 
 //services
 import { KiwoomService, CommonService }  from './app.service';
@@ -34,7 +35,8 @@ import { routing } from './app.routing';
         OverviewComponent,
         TradingComponent,
         ChartComponent,
-        HistoryComponent
+        HistoryComponent,
+        RecordComponent
     ],
     
     bootstrap:    [AppComponent],

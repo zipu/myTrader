@@ -13,6 +13,7 @@
     new QWebChannel(qt.webChannelTransport, function(channel) {
       window.historyDB = channel.objects.history;
       window.kiwoom = channel.objects.kiwoom;
+      window.recordDB = channel.objects.record;
     })
   </script>
 </head>

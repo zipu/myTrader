@@ -1,0 +1,171 @@
+<div class="records">
+    <div class="buttons">
+        <button (click)="openRecordForm()" class="btn btn-default">
+            <i class="glyphicon glyphicon-pencil"></i>
+        </button>
+        <button (click)="openInfoForm()" class="btn btn-default" style="float:right">
+            <i class="glyphicon glyphicon-info-sign"></i>
+        </button>
+    </div>
+    <!--==============  여기서부터 매매기록 창 =====================-->
+    <div class="record-form" *ngIf="isRecordForm">
+        <form (keyup)="deleteKorean($event)">
+            <fieldset class="form-group col-sm-4">
+                <label for="entryDate">Entry date</label>
+                <input class="form-control" type="datetime-local" [(ngModel)]="record.entryDate" name="entryDate">
+            </fieldset>
+            <fieldset class="form-group col-sm-2">
+                <label for="product">Product</label>
+                <input type="text" name="product" class="form-control" [(ngModel)]="record.product" (keyup)=filter()>
+                <div class="list-group" *ngIf="filteredList.length > 0">
+                    <button type="button" class="list-group-item" (click)="select(item)" *ngFor="let item of filteredList">
+                            {{item}}
+                    </button>
+                </div>
+            </fieldset>
+            <fieldset class="form-group col-sm-2">
+                <label for="contracts">Contracts</label>
+                <input type="number" min="1" class="form-control" name="contracts" [(ngModel)]="record.contracts">
+            </fieldset>
+            <fieldset class="form-group col-sm-2">
+                <label for="position">Position</label>
+                <select class="form-control" name="position" [(ngModel)]="record.position">
+                    <option value="Long">Long</option>
+                    <option value="Short">Short</option>
+                </select>
+            </fieldset>
+            <fieldset class="form-group col-sm-2">
+                <label for="commission">Commission</label>
+                <input type="number" class="form-control" name="commission" [(ngModel)]="record.commission">
+            </fieldset>
+            <fieldset class="form-group col-sm-2">
+                <label for="priceOpen">Open</label>
+                <input type="text" class="form-control" name="priceOpen" [(ngModel)]="record.priceOpen">
+            </fieldset>
+            <fieldset class="form-group col-sm-2">
+                <label for="priceHigh">High</label>
+                <input type="text" class="form-control" name="priceHigh" [(ngModel)]="record.priceHigh">
+            </fieldset>
+            <fieldset class="form-group col-sm-2">
+                <label for="priceLow">Low</label>
+                <input type="text" class="form-control" name="priceLow" [(ngModel)]="record.priceLow">
+            </fieldset>
+            <fieldset class="form-group col-sm-2">
+                <label for="priceClose">Close</label>
+                <input type="text" class="form-control" name="priceClose" [(ngModel)]="record.priceClose">
+            </fieldset>
+            <fieldset class="form-group col-sm-4">
+                <label for="entryDate">Exit date</label>
+                <input class="form-control" type="datetime-local" name="exitDate" [(ngModel)]="record.exitDate">
+            </fieldset>
+            <fieldset class="form-group col-sm-4">
+                <label for="reasonBuy">Reason to buy</label>
+                <input type="text" class="form-control" name="reasonBuy" [(ngModel)]="record.reasonBuy">
+            </fieldset>
+            <fieldset class="form-group col-sm-2">
+                <label for="lossCut">Loss cut</label>
+                <input type="text" class="form-control" name="lossCut" [(ngModel)]="record.lossCut">
+            </fieldset>
+            <fieldset class="form-group col-sm-4">
+                <label for="reasonSell">Reason to sell</label>
+                <input type="text" class="form-control" name="reasonSell" [(ngModel)]="record.reasonSell">
+            </fieldset>
+            <fieldset class="form-group col-sm-2">
+                <label for="description">Description</label>
+                <input type="text" class="form-control" name="description" [(ngModel)]="record.description">
+            </fieldset>
+            <fieldset class="form-group col-sm-3">
+                <label for="profit">Profit</label>
+                <input type="number" class="form-control" name="profit" [(ngModel)]="record.profit" disabled>
+            </fieldset>
+            <fieldset class="form-group col-sm-3">
+                <label for="ticks">Ticks</label>
+                <input type="number" class="form-control" name="ticks" [(ngModel)]="record.tick" disabled>
+            </fieldset>
+            <fieldset class="form-group col-sm-3">
+                <label for="duration">Duration</label>
+                <input type="text" class="form-control" name="duration" [(ngModel)]="record.duration" disabled>
+            </fieldset>
+            <fieldset class="form-group col-sm-3">
+                <label for="tradingType">Trading type</label>
+                <input type="text" class="form-control" name="tradingType" [(ngModel)]="record.tradingType" disabled>
+            </fieldset>
+            </form>
+            <fieldset class="form-group col-sm-12">
+                <button class="btn btn-default" (click)='saveRecord()' style="width:10%;color:blue;">Save</button>
+                <button class="btn btn-default" (click)='deleteRecord()' style="width:10%;float:right;color:red;">Delete</button>
+            </fieldset>
+        
+    </div>
+    <!-- ========== 여기까지 매매기록 창 ========= -->
+    <!--========== 여기서부터 종목 정보 기록창 =========-->
+    <div class="info-form" *ngIf="isInfoForm">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th style='width:18%'>Product</th>
+                    <th style='width:18%'>Tick price</th>
+                    <th style='width:18%'>Tick value</th>
+                    <th style='width:18%'>Commission</th>
+                    <th style='width:18%'>Number System</th>
+                    <th style='width:10%'></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let row of infoList" style="height:10px">
+                    <td>{{row.product}}</td>
+                    <td>{{row.tickPrice}}</td>
+                    <td>{{row.tickValue}}</td>
+                    <td>{{row.commission}}</td>
+                    <td>{{row.notation}}</td>
+                    <td><button type="submit" class="btn btn-default" (click)="removeInfo(row.index)" style="height:20px;padding-top:0">
+                        <i class="glyphicon glyphicon-trash" style="font-size: 12px;"></i>
+                        </button></td>
+                </tr>
+                <tr>
+                    <td><input type="text" class="form-control" name="product" [(ngModel)]="recordInfo.product"></td>
+                    <td><input type="text" class="form-control" name="tickPrice" [(ngModel)]="recordInfo.tickPrice"></td>
+                    <td><input type="text" class="form-control" name="tickValue" [(ngModel)]="recordInfo.tickValue"></td>
+                    <td><input type="text" class="form-control" name="commission" [(ngModel)]="recordInfo.commission"></td>
+                    <td><input type="text" class="form-control" name="notation" [(ngModel)]="recordInfo.notation"></td>
+                    <td><button type="submit" class="btn btn-default" (click)="addInfo()">
+                        <i class="glyphicon glyphicon-plus"></i></button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <!-- ========= 여기까지 종목 정보 기록창 ========== -->
+    <!-- ========= 여기부터 매매결과 테이블 =========== -->
+    <table class="table table-condensed table-bordered table-hover table-striped">
+        <thead>
+            <tr>
+                <th style='width:5%'>#</th>
+                <th style='width:10%'>Date</th>
+                <th style='width:14%'>Product</th>
+                <th style='width:5%'>Cons</th>
+                <th style='width:6%'>Position</th>
+                <th style='width:10%'>Profit</th>
+                <th style='width:10%'>Ticks</th>
+                <th style='width:10%'>Time Frame</th>
+                <th style='width:15%'>Strategy</th>
+                <th style='width:10%'>Detail</th>
+                <th style='width:5%'>Star</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let row of recordsList" (click)="getRecord(row.index)">
+                <td style='width:5%'>{{row.index}}</td>
+                <td style='width:10%'>{{row.entryDate}}</td>
+                <td style='width:14%'>{{row.product}}</td>
+                <td style='width:5%'>{{row.contracts}}</td>
+                <td style='width:6%' [style.color]="row.position=='Long'? 'purple': 'green'">{{row.position}}</td>
+                <td style='width:10%'>{{row.profit}}</td>
+                <td style='width:10%'>{{row.ticks}}</td>
+                <td style='width:10%'>{{row.tradingType}}</td>
+                <td style='width:15%' [style.color]="row.tick_diff > 0 ? 'blue': 'red'">{{row.reasonBuy}}</td>
+                <td style='width:10%' [style.color]="row.profit > 0 ? 'blue': 'red'" class="dollar">{{row.description}}</td>
+                <td style='width:5%'>{{row.star}}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>

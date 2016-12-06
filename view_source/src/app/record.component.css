@@ -1,0 +1,54 @@
+.modal {
+    display: block;
+    overflow-y: auto;
+}
+
+.modal-dialog {
+    width: 850px;
+}
+
+.modal-body {}
+
+.submit {
+    margin: 0 auto;
+    display: block;
+}
+
+table {
+    table-layout: fixed;
+}
+
+table * {
+    text-align: center;
+    cursor: default;
+}
+
+.record-form {
+    display: block;
+    margin-bottom: 10px;
+}
+
+.buttons {
+    margin-bottom: 10px;
+    font-weight: bold;
+    display: block;
+}
+
+input[readonly],
+textarea[readonly],
+select[disabled] {
+    background-color: #F5F4EB;
+    color: black;
+}
+
+.list-group {
+    z-index: 10;
+    position: absolute;
+}
+
+.list-group-item {
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+
+
