@@ -19,7 +19,8 @@ class Record(QObject):
     @pyqtSlot(str)
     def saveRecord(self, record):
         """ 매매기록을 dB에 저장"""
-        from decimal import Decimal #부동 소숫점 연산
+        from decimal import Decimal, getcontext #부동 소숫점 연산
+        getcontext().prec = 6
         
         newRecord = util.toDict(record)
         productInfo = self.getProductInfo(newRecord['product']) #종목정보
@@ -43,9 +44,14 @@ class Record(QObject):
         if ('priceClose' in newRecord) and newRecord['priceClose']:
             priceOpen = Decimal(newRecord['priceClose'])
             priceClose = Decimal(newRecord['priceOpen'])
-            price_diff = float(priceOpen-priceClose)
-            newRecord['ticks'] = int(price_diff / float(productInfo['tickPrice']))
-            newRecord['profit'] = newRecord['ticks'] * float(productInfo['tickValue'])
+            sign = 1 if newRecord['position']=='Long' else -1
+            price_diff = (priceOpen-priceClose) * sign
+            ticks = int(price_diff / Decimal(productInfo['tickPrice']))
+            profit = float((ticks * Decimal(productInfo['tickValue']) \
+                     - Decimal(newRecord['commission'])) * newRecord['contracts'])
+
+            newRecord['ticks'] = ticks
+            newRecord['profit'] = profit
 
         #save to DB
         curId = newRecord.pop('index') #레코드에서 인덱스를 없애야함, id는 검색할때 필요

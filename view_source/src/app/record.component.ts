@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonService } from './app.service';
-import { Statement, Record, RecordInfo } from './prototypes';
+import { Record, RecordInfo } from './prototypes';
 
 @Component({
   selector: 'my-record',
@@ -10,20 +10,12 @@ import { Statement, Record, RecordInfo } from './prototypes';
 
 
 export class RecordComponent {
-
   recordDB: any;
 
+  //레코드 기록 폼
   isInfoForm: boolean = false;
   isRecordForm: boolean = false;
 
-  modalOn: boolean = false;
-  isReadOnly: boolean = false;
-  curIndex: number = 0;
-
-  statement: Statement;
-  historyDB: any;
-  historyList: any[];
-  
   //매매기록
   record: Record = new Record();
   recordsList: any[];
@@ -34,7 +26,6 @@ export class RecordComponent {
 
   //for 자동완성
   filteredList: any[] = [];
-  
 
   constructor(
     private commonService: CommonService,
@@ -42,23 +33,19 @@ export class RecordComponent {
 
   ngOnInit() {
     //historyDB object 로드 끝날때까지 기다림
-    if (( < any > window).historyDB == undefined) {
+    if (( < any > window).recordDB == undefined) {
       setTimeout(() => {
         this.ngOnInit();
       }, 100);
     } else {
-      this.historyDB = ( < any > window).historyDB;
       this.recordDB = (<any>window).recordDB;
-      this.getDBList();
-
       this.getInfo(); //종목 정보를 db에서 불러옴 
       this.getRecordsList(); //레코드 기록을 db에서 불러옴
     }
   }
 
   /** Methods for Record table */
-  
-  //DB로부터 레코드 불러옴
+    //DB로부터 레코드 불러옴
   getRecordsList() {
     this.recordDB.getRecordsList().then ( (data:any) => {
       this.recordsList = data;
@@ -79,19 +66,18 @@ export class RecordComponent {
 
   saveRecord() {
     if (this.record.product && this.record.position && this.record.priceOpen) {
-      //가격이 잘못 되었는지 확인
-      //let tickPrice = this.infoList.filter( function(key:any){
-      //                  return key.product == this.record.product 
-      //                }.bind(this))[0].tickPrice;  
-      //if (this.record.priceOpen < tickPrice || this.record.priceClose < tickPrice){
-      //    this.commonService.pop_alert('Wrong Price');
-      //} else {
-        let newRecord = JSON.stringify(this.record);
-        this.recordDB.saveRecord(newRecord);
-        this.openRecordForm();
-      //}
+      let checkProduct = this.infoList.filter( function(obj:any){
+        return obj.product == this.record.product;
+      }.bind(this)); 
+      if (!checkProduct.length) { //product가 종목 정보 리스트에 있는지 확인
+        this.commonService.pop_alert('Not valid product');
+      } else {
+          let newRecord = JSON.stringify(this.record);
+          this.recordDB.saveRecord(newRecord);
+          this.openRecordForm();
+      }
     } else {
-      this.commonService.pop_alert('Fill fields')
+      this.commonService.pop_alert('Fill fields');
     }
   }
 
@@ -100,7 +86,11 @@ export class RecordComponent {
     this.isRecordForm = true;
     this.recordDB.getRecord(index).then ( (data:any) => {
       this.record = Object.assign(new Record(), data);
-    })
+      if (!this.record.exitDate) {
+        this.record.exitDate = this.commonService.now().datetime;
+      }
+      console.log(this.record)
+    });
   }
 
   //레코드 삭제
@@ -110,8 +100,6 @@ export class RecordComponent {
       this.openRecordForm();
     }
   }
-
-
 
   /** Methods for product Information */
   openInfoForm() {
@@ -124,11 +112,11 @@ export class RecordComponent {
   getInfo() {
     this.recordDB.getInfo().then( (info:any) => {
         this.infoList = info;
-    })
+    });
   }
 
   addInfo() {
-    if (Object.keys(this.recordInfo).length > 0 ) {
+    if (Object.keys(this.recordInfo).length > 0 ) { //필드가 하날도 채워있어야 함
       let newInfo = JSON.stringify(this.recordInfo);
       this.recordDB.addInfo(newInfo); //파이썬 record모듈 addInfo 함수 호출
     } 
@@ -161,45 +149,12 @@ export class RecordComponent {
     this.filteredList = []; //필터링 목록은 초기화
   }
 
-  reset() {
-    this.getDBList();
-    this.modalOn = false;
-    this.isReadOnly = false;
-    this.curIndex = 0;
-  }
-
-  delete() {
-    if (confirm('Do you really want to delete?')) {
-      this.historyDB.delete(this.curIndex);
-      this.reset();
-    }
-  }
-
-
-  getStatement(index: number) {
-    this.curIndex = index;
-    this.historyDB.getStatement(index).then((data: any) => {
-      this.statement = Object.assign(new Statement(), data);
-      this.modalOn = true;
-      this.isReadOnly = true;
-      console.log(this.statement);
-    });
-
-  }
-
-  //db로부터 데이터 리스트를 불러옴
-  getDBList() {
-    this.historyDB.getDBList().then((data: any) => {
-      this.historyList = data;
-    });
-  }
-
-  //한글 타이핑시 두번씩 입력 되는거 삭제
-  deleteKorean(event: any) {
-    let lastChar = event.target.value.substr(-1);
-    if (lastChar.match('[^\u0000-\u007F]+') && event.keyCode != 8 && event.keyCode != 16) {
-      event.target.value = event.target.value.slice(0, -1);
-    }
+    //한글 타이핑시 두번씩 입력 되는거 삭제
+  deleteKorean(event:any){
+      let lastChar =  event.target.value.substr(-1);
+      if (lastChar.match('[^\u0000-\u007F]+') && event.keyCode != 8 && event.keyCode != 16 ) {
+        event.target.value = event.target.value.slice(0,-1);
+      }
   }
 
 }

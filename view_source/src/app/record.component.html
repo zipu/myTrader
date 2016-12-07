@@ -1,4 +1,4 @@
-<div class="records">
+<div class="records row">
     <div class="buttons">
         <button (click)="openRecordForm()" class="btn btn-default">
             <i class="glyphicon glyphicon-pencil"></i>
@@ -40,19 +40,19 @@
             </fieldset>
             <fieldset class="form-group col-sm-2">
                 <label for="priceOpen">Open</label>
-                <input type="text" class="form-control" name="priceOpen" [(ngModel)]="record.priceOpen">
+                <input type="number" class="form-control" name="priceOpen" [(ngModel)]="record.priceOpen">
             </fieldset>
             <fieldset class="form-group col-sm-2">
                 <label for="priceHigh">High</label>
-                <input type="text" class="form-control" name="priceHigh" [(ngModel)]="record.priceHigh">
+                <input type="number" class="form-control" name="priceHigh" [(ngModel)]="record.priceHigh">
             </fieldset>
             <fieldset class="form-group col-sm-2">
                 <label for="priceLow">Low</label>
-                <input type="text" class="form-control" name="priceLow" [(ngModel)]="record.priceLow">
+                <input type="number" class="form-control" name="priceLow" [(ngModel)]="record.priceLow">
             </fieldset>
             <fieldset class="form-group col-sm-2">
                 <label for="priceClose">Close</label>
-                <input type="text" class="form-control" name="priceClose" [(ngModel)]="record.priceClose">
+                <input type="number" class="form-control" name="priceClose" [(ngModel)]="record.priceClose">
             </fieldset>
             <fieldset class="form-group col-sm-4">
                 <label for="entryDate">Exit date</label>
@@ -90,12 +90,11 @@
                 <label for="tradingType">Trading type</label>
                 <input type="text" class="form-control" name="tradingType" [(ngModel)]="record.tradingType" disabled>
             </fieldset>
-            </form>
-            <fieldset class="form-group col-sm-12">
-                <button class="btn btn-default" (click)='saveRecord()' style="width:10%;color:blue;">Save</button>
-                <button class="btn btn-default" (click)='deleteRecord()' style="width:10%;float:right;color:red;">Delete</button>
-            </fieldset>
-        
+        </form>
+        <fieldset class="form-group col-sm-12">
+            <button class="btn btn-default" (click)='saveRecord()' style="width:10%;color:blue;">Save</button>
+            <button class="btn btn-default" (click)='deleteRecord()' style="width:10%;float:right;color:red;">Delete</button>
+        </fieldset>
     </div>
     <!-- ========== 여기까지 매매기록 창 ========= -->
     <!--========== 여기서부터 종목 정보 기록창 =========-->
@@ -143,9 +142,9 @@
                 <th style='width:10%'>Date</th>
                 <th style='width:14%'>Product</th>
                 <th style='width:5%'>Cons</th>
-                <th style='width:6%'>Position</th>
+                <th style='width:7%'>Position</th>
                 <th style='width:10%'>Profit</th>
-                <th style='width:10%'>Ticks</th>
+                <th style='width:9%'>Ticks</th>
                 <th style='width:10%'>Time Frame</th>
                 <th style='width:15%'>Strategy</th>
                 <th style='width:10%'>Detail</th>
@@ -158,12 +157,12 @@
                 <td style='width:10%'>{{row.entryDate}}</td>
                 <td style='width:14%'>{{row.product}}</td>
                 <td style='width:5%'>{{row.contracts}}</td>
-                <td style='width:6%' [style.color]="row.position=='Long'? 'purple': 'green'">{{row.position}}</td>
-                <td style='width:10%'>{{row.profit}}</td>
-                <td style='width:10%'>{{row.ticks}}</td>
+                <td style='width:7%' [style.color]="row.position=='Long'? 'purple': 'green'">{{row.position}}</td>
+                <td style='width:10%' [style.color]="row.profit > 0 ? 'blue': 'red'" class="dollar">{{row.profit}}</td>
+                <td style='width:9%' [style.color]="row.ticks > 0 ? 'blue': 'red'">{{row.ticks}}</td>
                 <td style='width:10%'>{{row.tradingType}}</td>
-                <td style='width:15%' [style.color]="row.tick_diff > 0 ? 'blue': 'red'">{{row.reasonBuy}}</td>
-                <td style='width:10%' [style.color]="row.profit > 0 ? 'blue': 'red'" class="dollar">{{row.description}}</td>
+                <td style='width:15%'>{{row.reasonBuy}}</td>
+                <td style='width:10%'>{{row.description}}</td>
                 <td style='width:5%'>{{row.star}}</td>
             </tr>
         </tbody>

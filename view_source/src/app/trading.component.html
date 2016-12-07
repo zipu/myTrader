@@ -44,7 +44,6 @@
                 </table>
             </div>
         </div>
-
         <!--종목정보 화면 -->
         <div class="p-info col-md-5">
             <table class="table table-condensed table-bordered">
@@ -82,15 +81,14 @@
         </div>
     </div>
     <div class="second row">
-    <!-- 차트화면 -->
-    <div class="chart col-md-7">
-    <my-chart *ngIf="selectedProduct" [product]="selectedProduct"></my-chart>
-    </div>
-    
-    <!-- 호가정보 화면 -->
-    <div class="hoga col-md-5">
-        <p> test </p>
-    </div>
+        <!-- 차트화면 -->
+        <div class="chart col-md-7">
+            <my-chart *ngIf="selectedProduct" [product]="selectedProduct"></my-chart>
+        </div>
+        <!-- 호가정보 화면 -->
+        <div class="hoga col-md-5">
+            <p> test </p>
+        </div>
     </div>
     <div *ngIf="isModalOn" class="modal">
         <div class="modal-dialog">

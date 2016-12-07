@@ -11,9 +11,8 @@
   <script type="text/javascript" src="../public/js/bokeh.min.js"></script>
   <script>
     new QWebChannel(qt.webChannelTransport, function(channel) {
-      window.historyDB = channel.objects.history;
-      window.kiwoom = channel.objects.kiwoom;
-      window.recordDB = channel.objects.record;
+      window.kiwoom = channel.objects.kiwoom; //kiwoom API 로드
+      window.recordDB = channel.objects.record; //record API 로드
     })
   </script>
 </head>

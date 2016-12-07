@@ -1,10 +1,9 @@
 import { Component} from '@angular/core';
 //import { Router, RouteConfig, ROUTER_DIRECTIVES} from '@angular/router-deprecated';
-import { CommonService, KiwoomService } from './app.service';
+import { CommonService } from './app.service';
 
-import { TradingComponent } from './trading.component';
-import { OverviewComponent } from './overview.component';
-import { HistoryComponent } from './history.component';
+//import { TradingComponent } from './trading.component';
+//import { OverviewComponent } from './overview.component';
 
 
 import '../../public/css/styles.css';

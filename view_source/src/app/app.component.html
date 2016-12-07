@@ -1,6 +1,6 @@
 <nav class="navbar navbar-inverse navbar-fixed-top">
   <div class="container-fluid">
-    <a class="navbar-brand" href="#">{{title}}</a>
+    <a class="navbar-brand" href="#" style="color:gold;padding-left:2%">탐욕은 잠시 마음에 품는것 만으로도 반드시 대가를 치른다</a>
     <ul class="nav navbar-nav navbar-right ">
       <li><a [routerLink]="['/overview']">Menu1</a></li>
       <li><a [routerLink]="['/trading']">Menu2</a></li>
@@ -15,7 +15,6 @@
       <ul class="nav nav-sidebar">
         <li [routerLinkActive]="['active']"><a [routerLink]="['/overview']">Overview<span class="sr-only">(current)</span></a></li>
         <li [routerLinkActive]="['active']"><a [routerLink]="['/trading']">Trading</a></li>
-        <li [routerLinkActive]="['active']"><a [routerLink]="['/history']">History</a></li>
         <li [routerLinkActive]="['active']"><a [routerLink]="['/record']">Record</a></li>
       </ul>
     </div>

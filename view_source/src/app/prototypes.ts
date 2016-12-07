@@ -35,7 +35,7 @@ export class Record {
     public entryDate: string; //진입 날짜
     public exitDate: string; //청산 날짜
     public contracts: number; //계약수
-    public position: string; //매매 포지션
+    public position: number; //매매 포지션 - 1: long, -1:short
     public priceOpen: string; //진입 가격
     public priceClose: string; //청산 가격
     public priceHigh: string; //보유중 최고가
