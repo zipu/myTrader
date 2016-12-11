@@ -1,5 +1,7 @@
 <div class="overview-view row">
-<div class="temp">
-    <p>test : {{test}}</p>
-</div>
+    <div class="temp">
+        <button type="button" (click)="test()">test</button>
+         <button type="button" (click)="drawChart()">chart</button>
+    </div>
+    <div #chartDiv style="width:800px;height:400px;"></div>
 </div>

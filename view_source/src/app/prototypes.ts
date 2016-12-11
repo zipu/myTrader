@@ -36,15 +36,19 @@ export class Record {
     public exitDate: string; //청산 날짜
     public contracts: number; //계약수
     public position: number; //매매 포지션 - 1: long, -1:short
-    public priceOpen: string; //진입 가격
-    public priceClose: string; //청산 가격
-    public priceHigh: string; //보유중 최고가
-    public priceLow: string; //보유중 최저가
+    public priceOpen: number; //진입 가격
+    public priceClose: number; //청산 가격
+    public priceHigh: number; //보유중 최고가
+    public priceLow: number; //보유중 최저가
 
     //2. 결과 데이터
     public commission: number; //수수료
     public profit: number; //손익
     public ticks: number; //수익(틱)
+    public profitHigh: number;
+    public profitLow: number;
+    public ticksHigh: number;
+    public ticksLow: number;
     public duration: string; //포지션 보유 기간
     public tradingType: string; //타임 프레임
     
@@ -58,7 +62,6 @@ export class Record {
     constructor() {
       this.index = 0;
       this.contracts = 1;
-      this.commission = 7;
      }
 
 }

@@ -12,18 +12,51 @@ class Record(QObject):
         self.logger = logging.getLogger(__name__)
         self.con = lite.connect("./data/record.db")
 
-    @pyqtSlot()
-    def test(self):
-        print(self.getProductInfo('EUR/USD'))
     
+    ######################################################################
+    #    Overview 화면용 Methods                                          #
+    ######################################################################
+    @pyqtSlot(result=QVariant)
+    def getAllData(self):
+        """ 통계용 데이터를 DB에서 부름 """
+        data = dict(
+            profit=[], ticks=[], commission=[]
+        )
+
+        with self.con:
+            cumProfit = 0 #누적 수익
+            cumTicks = 0 #누적 틱
+            cumComm = 0 #누적 수수료
+
+            cur = self.con.cursor()
+            items = "entryDate, profit, profitHigh, profitLow, \
+                     ticks, ticksHigh, ticksLow, commission"
+            cur.execute("SELECT {0} FROM Records".format(items))
+            rows = cur.fetchall()
+            for row in rows:
+                date = int(datetime.strptime(row[0], '%Y-%m-%dT%H:%M').timestamp() * 1000)
+                profit_ohlc = [date, cumProfit, cumProfit+float(row[2] or 0), cumProfit+float(row[3] or 0), cumProfit+float(row[1] or 0), 1 ]
+                ticks_ohlc = [date, cumTicks, cumTicks+int(row[5] or 0), cumTicks+int(row[6] or 0), cumTicks+float(row[4] or 0), 1]
+
+                data['profit'].append(profit_ohlc)
+                data['ticks'].append(ticks_ohlc)
+                data['commission'].append(cumComm+float(row[7]))
+
+                cumProfit = cumProfit + float(row[1] or 0)
+                cumTicks = cumTicks + float(row[4] or 0)
+                cumComm = cumComm + row[7]
+        return data
+
+    ######################################################################
+    #    Records 화면용 Methods                                          #
+    ######################################################################
     @pyqtSlot(str)
     def saveRecord(self, record):
         """ 매매기록을 dB에 저장"""
-        from decimal import Decimal, getcontext #부동 소숫점 연산
-        getcontext().prec = 6
         
         newRecord = util.toDict(record)
         productInfo = self.getProductInfo(newRecord['product']) #종목정보
+        newRecord['commission'] = newRecord['contracts'] * productInfo['commission']
 
         if ('exitDate' in newRecord) and newRecord['exitDate']:
             #청산시간 - 진입시간 계산하여 duration에 저장
@@ -42,16 +75,27 @@ class Record(QObject):
 
         #수익 계산 -- 일단 10진법만 생각. 나중에 수정필요
         if ('priceClose' in newRecord) and newRecord['priceClose']:
-            priceOpen = Decimal(newRecord['priceClose'])
-            priceClose = Decimal(newRecord['priceOpen'])
-            sign = 1 if newRecord['position']=='Long' else -1
-            price_diff = (priceOpen-priceClose) * sign
-            ticks = int(price_diff / Decimal(productInfo['tickPrice']))
-            profit = float((ticks * Decimal(productInfo['tickValue']) \
-                     - Decimal(newRecord['commission'])) * newRecord['contracts'])
-
-            newRecord['ticks'] = ticks
-            newRecord['profit'] = profit
+            (newRecord['ticks'], newRecord['profit']) \
+             = self.calcDiff(productInfo, newRecord['position'], newRecord['contracts'], newRecord['priceOpen'], newRecord['priceClose'])
+            if ('priceHigh' not in newRecord) or (not newRecord['priceHigh']):
+                newRecord['priceHigh'] = newRecord['priceOpen'] if newRecord['priceOpen'] > newRecord['priceClose'] else newRecord['priceClose']
+            if ('priceLow' not in newRecord) or (not newRecord['priceLow']):
+                newRecord['priceLow'] = newRecord['priceClose'] if newRecord['priceOpen'] > newRecord['priceClose'] else newRecord['priceOpen']
+            (ticksHigh, profitHigh) \
+                   = self.calcDiff(productInfo, newRecord['position'], newRecord['contracts'], newRecord['priceOpen'], newRecord['priceHigh'])
+            (ticksLow, profitLow) \
+                   = self.calcDiff(productInfo, newRecord['position'], newRecord['contracts'], newRecord['priceOpen'], newRecord['priceLow'])
+            
+            if newRecord['position'] == 'Long':
+                newRecord['ticksHigh'] = ticksHigh
+                newRecord['profitHigh'] = profitHigh
+                newRecord['ticksLow'] = ticksLow
+                newRecord['profitLow'] = profitLow
+            else:
+                newRecord['ticksHigh'] = ticksLow
+                newRecord['profitHigh'] = profitLow
+                newRecord['ticksLow'] = ticksHigh
+                newRecord['profitLow'] = profitHigh
 
         #save to DB
         curId = newRecord.pop('index') #레코드에서 인덱스를 없애야함, id는 검색할때 필요
@@ -69,6 +113,24 @@ class Record(QObject):
                 cur.execute("UPDATE Records SET {0}=? WHERE Id=?".format(keys), values)
 
 
+    def calcDiff(self, info, position, contracts, first, last):
+        """ 가격 차이 계산 """
+        from decimal import Decimal, getcontext #부동 소숫점 연산
+        getcontext().prec = 6
+        
+        sign = 1 if position == 'Long' else -1
+        unit = Decimal(info['tickPrice'])
+        value = Decimal(info['tickValue'])
+        commission = Decimal(info['commission'])
+        contracts = Decimal(contracts)
+        first = Decimal(first)
+        last = Decimal(last)
+
+        diff = (last - first)* sign
+        ticks = int(diff / unit)
+        profit = float((ticks * value - commission)*contracts)
+        return (ticks, profit)
+    
     @pyqtSlot(result=QVariant)
     def getRecordsList(self):
         """매매 기록을 DB로부터 로드 """
@@ -124,6 +186,10 @@ class Record(QObject):
                 description=data[18],
                 isPlanned=data[19],
                 star=data[20],
+                profitHigh=data[21],
+                profitLow=data[22],
+                ticksHigh=data[23],
+                ticksLow=data[24]
             )
         return record
 

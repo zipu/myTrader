@@ -90,5 +90,4 @@ export class CommonService {
           datetime: yyyy+'-'+mm+'-'+dd+'T'+hours+':'+minutes,
       }
     }
-
 }

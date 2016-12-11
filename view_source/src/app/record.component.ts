@@ -28,7 +28,7 @@ export class RecordComponent {
   filteredList: any[] = [];
 
   constructor(
-    private commonService: CommonService,
+    private commonService: CommonService
   ) {}
 
   ngOnInit() {
@@ -57,7 +57,7 @@ export class RecordComponent {
     this.record = new Record();
     this.isRecordForm = !this.isRecordForm; //매매기록창 열기 
     this.isInfoForm = false; //종목정보창 닫기
-    if (this.isRecordForm == true){
+    if (this.isRecordForm == true){ //새로 작성할때 
       this.record.entryDate = this.commonService.now().datetime;
     } else {
       this.getRecordsList();
