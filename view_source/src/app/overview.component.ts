@@ -25,6 +25,11 @@ export class OverviewComponent{
       this.getData();
     }
   }
+  test() {
+      this.recordDB.getStrategy().then( (el:any) => {
+        console.log(el);
+      });
+  }
 
   getData() {
     this.recordDB.getAllData().then( (data:any)=> {
@@ -34,21 +39,16 @@ export class OverviewComponent{
 
   drawChart(el:any) {
     let data = el.profit
-    let ohlc:any[] = [],
-        volume:any[] = [],
-        dataLength = data.length,
+    let ohlc:any[] = []
+    let volume:any[] = []
+    let dataLength = data.length
             // set the allowed units for data grouping
-            groupingUnits = [[
+    let groupingUnits = [[
                 'day',                         // unit name
                 [1]                             // allowed multiples
-            ], [
-                'month',
-                [1, 2, 3, 4, 6]
-            ]],
+        ]]
 
-            i = 0;
-
-        for (i; i < dataLength; i += 1) {
+    for (let i=0; i < dataLength; i += 1) {
             ohlc.push([
                 data[i][0], // the date
                 data[i][1], // open
@@ -65,12 +65,33 @@ export class OverviewComponent{
 
     Highcharts.stockChart(this.chartDiv.nativeElement, {
 
+            
             rangeSelector: {
-                selected: 1
+                buttons: [ {
+                    type: 'week',
+                    count: 1,
+                    text: '1w'
+                }, {
+                    type: 'month',
+                    count: 1,
+                    text: '1m'
+                }, {
+                    type: 'month',
+                    count: 6,
+                    text: '6m'
+                }, {
+                    type: 'year',
+                    count: 1,
+                    text: '1y'
+                }, {
+                    type: 'all',
+                    text: 'All'
+                }],
+                selected: 3
             },
 
             title: {
-                text: 'AAPL Historical'
+                text: 'Profit Chart'
             },
 
             yAxis: [{
@@ -103,10 +124,11 @@ export class OverviewComponent{
 
             series: [{
                 type: 'candlestick',
-                name: 'AAPL',
+                name: 'Profit',
                 data: ohlc,
                 dataGrouping: {
-                    units: groupingUnits
+                    forced: true,
+                    units: [['day',[1]], [['week'],[1]]]
                 }
             }, {
                 type: 'column',
@@ -114,7 +136,9 @@ export class OverviewComponent{
                 data: volume,
                 yAxis: 1,
                 dataGrouping: {
-                    units: groupingUnits
+                    approximation: "sum",
+                    forced: true,
+                    units: [['day',[1]], [['week'],[1]]]
                 }
             }]
         });

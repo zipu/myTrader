@@ -96,7 +96,10 @@ class Record(QObject):
                 newRecord['profitHigh'] = profitLow
                 newRecord['ticksLow'] = ticksHigh
                 newRecord['profitLow'] = profitHigh
-
+        
+        if ('reasonBuy' in newRecord) and newRecord['reasonBuy']:
+            newRecord['reasonBuy'] = newRecord['reasonBuy'].lower()
+        
         #save to DB
         curId = newRecord.pop('index') #레코드에서 인덱스를 없애야함, id는 검색할때 필요
         #new Record
@@ -255,4 +258,18 @@ class Record(QObject):
             productInfo['notation'] = data[5]
         return productInfo
 
+    @pyqtSlot(result=QVariant)
+    def getStrategy(self):
+        """ 매매전략 자동완성용 db """
+        with self.con:
+            cur = self.con.cursor()
+            cur.execute("SELECT  strategy FROM Strategy")
+            rows = cur.fetchall()
+            strategies = [x[0] for x in rows]
+        return strategies
 
+    @pyqtSlot(str)
+    def addStrategy(self,newStrat):
+        with self.con:
+            cur = self.con.cursor()
+            cur.execute("INSERT INTO Strategy(strategy) VALUES(?)", (newStrat.lower(),))

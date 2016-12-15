@@ -16,8 +16,8 @@
             </fieldset>
             <fieldset class="form-group col-sm-2">
                 <label for="product">Product</label>
-                <input type="text" name="product" class="form-control" [(ngModel)]="record.product" (keyup)=filter()>
-                <div class="list-group" *ngIf="filteredList.length > 0">
+                <input type="text" name="product" class="form-control" [(ngModel)]="record.product" (keyup)="filter('product')">
+                <div class="list-group" *ngIf="filteringField=='product'">
                     <button type="button" class="list-group-item" (click)="select(item)" *ngFor="let item of filteredList">
                             {{item}}
                     </button>
@@ -60,11 +60,16 @@
             </fieldset>
             <fieldset class="form-group col-sm-4">
                 <label for="reasonBuy">Reason to buy</label>
-                <input type="text" class="form-control" name="reasonBuy" [(ngModel)]="record.reasonBuy">
+                <input type="text" class="form-control" name="reasonBuy" [(ngModel)]="record.reasonBuy" (keyup)="filter('reasonBuy')">
+                <div class="list-group" *ngIf="filteringField=='reasonBuy'">
+                    <button type="button" class="list-group-item" (click)="select(item)" *ngFor="let item of filteredList">
+                            {{item}}
+                    </button>
+                </div>
             </fieldset>
             <fieldset class="form-group col-sm-2">
                 <label for="lossCut">Loss cut</label>
-                <input type="text" class="form-control" name="lossCut" [(ngModel)]="record.lossCut">
+                <input type="number" class="form-control" name="lossCut" [(ngModel)]="record.lossCut">
             </fieldset>
             <fieldset class="form-group col-sm-4">
                 <label for="reasonSell">Reason to sell</label>

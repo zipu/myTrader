@@ -13,8 +13,8 @@ export class RecordComponent {
   recordDB: any;
 
   //레코드 기록 폼
-  isInfoForm: boolean = false;
-  isRecordForm: boolean = false;
+  isInfoForm: boolean;
+  isRecordForm: boolean;
 
   //매매기록
   record: Record = new Record();
@@ -22,10 +22,13 @@ export class RecordComponent {
 
   //종목 정보
   recordInfo: RecordInfo;
-  infoList: any[] = [];
+  infoList: any[];
 
   //for 자동완성
-  filteredList: any[] = [];
+  filteredList: string[] = [];
+  products: string[];
+  strategies: string[];
+  filteringField:string;
 
   constructor(
     private commonService: CommonService
@@ -39,9 +42,20 @@ export class RecordComponent {
       }, 100);
     } else {
       this.recordDB = (<any>window).recordDB;
-      this.getInfo(); //종목 정보를 db에서 불러옴 
-      this.getRecordsList(); //레코드 기록을 db에서 불러옴
+      this.myInit();
     }
+  }
+
+
+  /** refresh all **/
+  myInit(){
+    this.record = new Record();
+    this.isInfoForm = false;
+    this.isRecordForm = false;
+    this.filteringField = "";
+    this.getRecordsList();
+    this.getInfo();
+    this.getStrategy();
   }
 
   /** Methods for Record table */
@@ -54,13 +68,13 @@ export class RecordComponent {
 
   /** Methods for Record Form */
   openRecordForm() {
-    this.record = new Record();
+    //this.record = new Record();
     this.isRecordForm = !this.isRecordForm; //매매기록창 열기 
     this.isInfoForm = false; //종목정보창 닫기
     if (this.isRecordForm == true){ //새로 작성할때 
       this.record.entryDate = this.commonService.now().datetime;
-    } else {
-      this.getRecordsList();
+    } else { //저장하거나 record form 끌때
+      this.myInit();
     }
   }
 
@@ -74,7 +88,11 @@ export class RecordComponent {
       } else {
           let newRecord = JSON.stringify(this.record);
           this.recordDB.saveRecord(newRecord);
-          this.openRecordForm();
+          if (this.record.reasonBuy != null && this.strategies.indexOf(this.record.reasonBuy.toLowerCase()) == -1){
+            this.recordDB.addStrategy(this.record.reasonBuy);
+          }
+
+          this.myInit();
       }
     } else {
       this.commonService.pop_alert('Fill fields');
@@ -89,7 +107,6 @@ export class RecordComponent {
       if (!this.record.exitDate) {
         this.record.exitDate = this.commonService.now().datetime;
       }
-      console.log(this.record)
     });
   }
 
@@ -97,21 +114,31 @@ export class RecordComponent {
   deleteRecord() {
     if (confirm('정말 삭제하시겠습니까?')){
       this.recordDB.deleteRecord(this.record.index);
-      this.openRecordForm();
+      this.myInit();
     }
   }
 
   /** Methods for product Information */
   openInfoForm() {
-    this.isInfoForm = !this.isInfoForm; //종목정보창 열기
-    this.isRecordForm = false; //매매기록창 닫기
-    this.recordInfo = new RecordInfo();
+    if (this.isInfoForm == false) {
+      this.isInfoForm = true;
+      this.isRecordForm = false;
+      this.recordInfo = new RecordInfo();
+
+    } else {
+      this.isInfoForm = false;
+      this.myInit();
+    }
   }
 
   //파이썬 recordDB에서 종목정보 불러옴
   getInfo() {
+    this.products = [];
     this.recordDB.getInfo().then( (info:any) => {
         this.infoList = info;
+        this.infoList.forEach ( (obj:any) => {
+          this.products.push(obj.product);
+        })
     });
   }
 
@@ -129,15 +156,27 @@ export class RecordComponent {
     this.getInfo();
   }
 
+
   /** Methods for Auto completion */
-  filter() { // 타이핑 된 글자 목록에서 필터링
+  getStrategy(){
+    this.recordDB.getStrategy().then( (el:any) => {
+      this.strategies = el;
+    })
+  }
+
+  filter(name:string) { // 타이핑 된 글자 목록에서 필터링
     let initialList:any[]=[];    //전체 목록 담을 어레이
-    for (let key of this.infoList){
-      initialList.push(key.product); //infoList 에서 product만 불러와서 어레이로 저장
+    this.filteringField = name;
+
+    if (name == 'product') {
+      initialList = this.products;
+    } else if (name == 'reasonBuy'){
+      initialList = this.strategies;
     }
-    if (this.record.product !== "") {
+
+    if (this.record[name] !== "") {
       this.filteredList = initialList.filter(function (el:string) {
-        return el.toLowerCase().indexOf(this.record.product.toLowerCase()) > -1;
+        return el.toLowerCase().indexOf(this.record[name].toLowerCase()) > -1;
       }.bind(this));
     } else {
       this.filteredList = [];
@@ -145,7 +184,7 @@ export class RecordComponent {
   }
   
   select(item:string) { // 자동완성 목록에서 아이템 클릭시
-    this.record.product = item;  //쿼리 = 아이템명 
+    this.record[this.filteringField] = item;  //쿼리 = 아이템명 
     this.filteredList = []; //필터링 목록은 초기화
   }
 

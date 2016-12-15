@@ -7,7 +7,6 @@ from PyQt5.QtCore import Qt, QUrl
 from PyQt5.QtWebChannel import QWebChannel
 
 from .kiwoom import Kiwoom
-from .history import History
 from .record import Record
 
 class MainView(QWebEngineView):
@@ -19,17 +18,16 @@ class MainView(QWebEngineView):
 
         #setting up page and register kiwoom object into the javascript context
         self.kiwoom = Kiwoom()
-        self.history = History()
         self.record = Record()
+
         #for i in range(16):
-        #    self.page().settings().setAttribute(i, True)
-        #    print(self.page().settings().testAttribute(i))
+        #    self.settings().setAttribute(i, True)
+        #    print(self.settings().testAttribute(i))
         
         webchannel = QWebChannel(self.page())
         self.page().setWebChannel(webchannel)
 
         webObjects = {
-            "history" : self.history,
             "kiwoom" : self.kiwoom,
             "record" : self.record
         }

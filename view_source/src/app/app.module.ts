@@ -34,7 +34,7 @@ import { routing } from './app.routing';
         OverviewComponent,
         TradingComponent,
         ChartComponent,
-        RecordComponent
+        RecordComponent,
     ],
     
     bootstrap:    [AppComponent],
