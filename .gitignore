@@ -2,6 +2,7 @@ todo.md
 __pycache__/
 /view_source/node_modules/
 /view_source/typings/
+/view_source/public/js
 data/
 .vscode/
 /utils/collect_ticks.py

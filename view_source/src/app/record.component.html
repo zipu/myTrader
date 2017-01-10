@@ -140,7 +140,7 @@
     </div>
     <!-- ========= 여기까지 종목 정보 기록창 ========== -->
     <!-- ========= 여기부터 매매결과 테이블 =========== -->
-    <table class="table table-condensed table-bordered table-hover table-striped">
+    <table class="table table-condensed table-bordered table-hover table-striped" style="margin-bottom:0">
         <thead>
             <tr>
                 <th style='width:5%'>#</th>
@@ -157,19 +157,26 @@
             </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let row of recordsList" (click)="getRecord(row.index)">
-                <td style='width:5%'>{{row.index}}</td>
-                <td style='width:10%'>{{row.entryDate}}</td>
-                <td style='width:14%'>{{row.product}}</td>
-                <td style='width:5%'>{{row.contracts}}</td>
-                <td style='width:7%' [style.color]="row.position=='Long'? 'purple': 'green'">{{row.position}}</td>
-                <td style='width:10%' [style.color]="row.profit > 0 ? 'blue': 'red'" class="dollar">{{row.profit}}</td>
-                <td style='width:9%' [style.color]="row.ticks > 0 ? 'blue': 'red'">{{row.ticks}}</td>
-                <td style='width:10%'>{{row.tradingType}}</td>
-                <td style='width:15%'>{{row.reasonBuy}}</td>
-                <td style='width:10%'>{{row.description}}</td>
-                <td style='width:5%'>{{row.star}}</td>
+            <tr *ngFor="let row of recordsList">
+                <td style='width:5%' (click)="getRecord(row.index)">{{row.index}}</td>
+                <td style='width:10%' (click)="getRecord(row.index)">{{row.entryDate}}</td>
+                <td style='width:14%' (click)="getRecord(row.index)">{{row.product}}</td>
+                <td style='width:5%' (click)="getRecord(row.index)">{{row.contracts}}</td>
+                <td style='width:7%' (click)="getRecord(row.index)" [style.color]="row.position=='Long'? 'purple': 'green'">{{row.position}}</td>
+                <td style='width:10%' (click)="getRecord(row.index)" [style.color]="row.profit > 0 ? 'blue': 'red'" class="dollar">{{row.profit}}</td>
+                <td style='width:9%' (click)="getRecord(row.index)" [style.color]="row.ticks > 0 ? 'blue': 'red'">{{row.ticks}}</td>
+                <td style='width:10%' (click)="getRecord(row.index)">{{row.tradingType}}</td>
+                <td style='width:15%' (click)="getRecord(row.index)">{{row.reasonBuy}}</td>
+                <td style='width:10%' (click)="gotoOneNote(row.description)"><a *ngIf="row.description" style="cursor: pointer;">link</a></td>
+                <td style='width:5%' (click)="getRecord(row.index)">{{row.star}}</td>
             </tr>
         </tbody>
     </table>
+    <!-- ========= 여기부터 Pagination =========== -->
+    <div>
+        <ul class="pagination">
+            <li (click)="paging(-1)"><a>&laquo;</a></li>
+            <li (click)="paging(1)"><a>&raquo;</a></li>
+        </ul>
+    </div>
 </div>

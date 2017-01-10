@@ -1,9 +1,20 @@
-
 <div class="overview-view row">
-    <div class="temp">
-        <a href="onenote:https://d.docs.live.net/7ad43d49bf921232/문서/yosep의%20전자%20필기장/MyTrader.one#매매분석&section-id={3ADD4AFD-5F22-442E-8F48-E55F94588BB0}&page-id={467B4F34-52BE-4A8A-8764-B4E19C9A6E36}&object-id={F3E9651D-155B-057F-2897-CBE99C20A432}&12">test</a>
-        <button type="button" (click)="test()">test</button>
-         <button type="button" (click)="drawChart()">chart</button>
+    <div class="first-row">
+        <div class="timeframe">
+            <button class="btn btn-default btn-xs" type="button" (click)="timeFrame('tick', 1)">T</button>
+            <button class="btn btn-default btn-xs" type="button" (click)="timeFrame('day', 1)">D</button>
+            <button class="btn btn-default btn-xs" type="button" (click)="timeFrame('week', 1)">W</button>
+            <button class="btn btn-default btn-xs" type="button" (click)="timeFrame('month', 1)">M</button>
+        </div>
+        <div #equityDiv></div>
     </div>
-    <div #chartDiv style="width:800px;height:400px;"></div>
+    <div class="second-row">
+        <div class="timeframe-comp">
+            <button class="btn btn-default btn-xs" type="button" (click)="timeFrame('day', 2)">D</button>
+            <button class="btn btn-default btn-xs" type="button" (click)="timeFrame('week', 2)">W</button>
+            <button class="btn btn-default btn-xs" type="button" (click)="timeFrame('month', 2)">M</button>
+        </div>
+        <div class="compDiv" #compDiv></div>
+        <div class="freqDiv" #freqDiv></div>
+    </div>
 </div>

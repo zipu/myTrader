@@ -2,6 +2,8 @@
 import logging
 import sqlite3 as lite
 from datetime import datetime
+import pandas as pd
+import numpy as np
 
 from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal, QVariant
 from .util import util
@@ -19,33 +21,81 @@ class Record(QObject):
     @pyqtSlot(result=QVariant)
     def getAllData(self):
         """ 통계용 데이터를 DB에서 부름 """
-        data = dict(
-            profit=[], ticks=[], commission=[]
-        )
-
         with self.con:
-            cumProfit = 0 #누적 수익
-            cumTicks = 0 #누적 틱
-            cumComm = 0 #누적 수수료
-
             cur = self.con.cursor()
             items = "entryDate, profit, profitHigh, profitLow, \
                      ticks, ticksHigh, ticksLow, commission"
             cur.execute("SELECT {0} FROM Records".format(items))
             rows = cur.fetchall()
-            for row in rows:
-                date = int(datetime.strptime(row[0], '%Y-%m-%dT%H:%M').timestamp() * 1000)
-                profit_ohlc = [date, cumProfit, cumProfit+float(row[2] or 0), cumProfit+float(row[3] or 0), cumProfit+float(row[1] or 0), 1 ]
-                ticks_ohlc = [date, cumTicks, cumTicks+int(row[5] or 0), cumTicks+int(row[6] or 0), cumTicks+float(row[4] or 0), 1]
+        #raw data용 pandas DataFrame 생성
+        cols = ['date', 'profit', 'profitHigh', 'profitLow', 'ticks', 'ticksHigh', 'ticksLow', 'commission']
+        rawData = pd.DataFrame(rows, columns=cols)
+        
+        #가공된 data용 Data frame
+        cols = ['date', 'profitOpen', 'profitHigh', 'profitLow', 'profitClose', 'ticksOpen', 'ticksHigh', 'ticksLow','ticksClose', 'commission']
+        data = pd.DataFrame(columns=cols)
+        data.date = pd.to_datetime(rawData.date)
+        
+        #profit OHLC
+        data.profitClose = rawData.profit.cumsum()
+        data.profitOpen = data.profitClose.shift(1)
+        data.ix[0,'profitOpen'] = 0
+        data.profitHigh = data.profitOpen + rawData.profitHigh
+        data.profitLow = data.profitOpen + rawData.profitLow
+        data.profitOpen = data.profitOpen - rawData.commission
 
-                data['profit'].append(profit_ohlc)
-                data['ticks'].append(ticks_ohlc)
-                data['commission'].append(cumComm+float(row[7]))
+        #ticks OHLC
+        data.ticksClose = rawData.ticks.cumsum()
+        data.ticksOpen = data.ticksClose.shift(1)
+        data.ix[0,'ticksOpen'] = 0
+        data.ticksHigh = data.ticksOpen + rawData.ticksHigh
+        data.ticksLow = data.ticksOpen + rawData.ticksLow
 
-                cumProfit = cumProfit + float(row[1] or 0)
-                cumTicks = cumTicks + float(row[4] or 0)
-                cumComm = cumComm + row[7]
-        return data
+        #commission
+        data.commission = rawData.commission.cumsum()
+        data['timestamp'] = data.date.map(lambda x: pd.Timestamp(x).timestamp()*1000)
+
+        #volume
+        data['volume'] = 1
+
+        #normalized data
+        data['profit_norm'] = (data.profitClose-data.profitClose.min())/(data.profitClose.max()-data.profitClose.min())*100
+        data['profit_norm'] = data.profit_norm.map(lambda x: round(x,2))
+        data['ticks_norm'] =(data.ticksClose-data.ticksClose.min())/(data.ticksClose.max()-data.ticksClose.min())*100
+        data['ticks_norm'] = data.ticks_norm.map(lambda x: round(x,2))
+        #result (win:1, lose:0)
+        data['result'] = np.where(rawData.ticks>0,1,0)
+
+        #cumulative winrate
+        data['winrate'] = (data.result.cumsum()/(data.index+1))*100
+        data['winrate'] = data.winrate.map(lambda x: round(x,2))
+
+        #frequncy data
+        freqTable = pd.DataFrame()
+        
+        ticks_min = rawData.ticks.min() - (rawData.ticks.min()%5)-2.5 
+        ticks_max = rawData.ticks.max() + (rawData.ticks.min()%5)+2.5 
+        ticks_rng = np.arange(ticks_min,ticks_max,5) #data range
+        freqTable['ticks_rng']= ticks_rng[:-1]+2.5
+        freqTable['ticks_freq'] = rawData.ticks.groupby(pd.cut(rawData.ticks, ticks_rng)).count().values
+        freqTable['ticks_freqP'] = (freqTable['ticks_freq']/freqTable['ticks_freq'].sum())*100
+        freqTable['ticks_freqP'] = freqTable.ticks_freqP.map(lambda x: round(x,2))
+
+        #web에 전달할 dictionary object 생성
+        dataDict = {}
+        dataDict['profitOHLC'] = data[['timestamp','profitOpen','profitHigh','profitLow','profitClose']].values.tolist() 
+        dataDict['tickOHLC'] = data[['timestamp','ticksOpen','ticksHigh','ticksLow','ticksClose']].values.tolist() 
+        dataDict['volume'] = data[['timestamp','volume']].values.tolist()
+        dataDict['commission'] = data[['timestamp','commission']].values.tolist()
+        dataDict['result'] = data[['timestamp','result']].values.tolist()
+        dataDict['winrate'] = data[['timestamp','winrate']].values.tolist()
+        dataDict['profit'] = data[['timestamp','profit_norm']].values.tolist()
+        dataDict['ticks'] = data[['timestamp','ticks_norm']].values.tolist()
+        dataDict['freq_ticks'] = freqTable[['ticks_rng','ticks_freqP']].values.tolist()
+        
+        return dataDict
+
+        
 
     ######################################################################
     #    Records 화면용 Methods                                          #
@@ -99,6 +149,12 @@ class Record(QObject):
         
         if ('reasonBuy' in newRecord) and newRecord['reasonBuy']:
             newRecord['reasonBuy'] = newRecord['reasonBuy'].lower()
+
+        if ('description' in newRecord) and newRecord['description']:
+            link = newRecord['description']
+            ind = link.find('onenote')
+            if ind is not -1:
+                newRecord['description'] = link[ind:]
         
         #save to DB
         curId = newRecord.pop('index') #레코드에서 인덱스를 없애야함, id는 검색할때 필요
@@ -134,16 +190,22 @@ class Record(QObject):
         profit = float((ticks * value - commission)*contracts)
         return (ticks, profit)
     
-    @pyqtSlot(result=QVariant)
-    def getRecordsList(self):
+    @pyqtSlot(int, result=QVariant)
+    def getRecordsList(self, page):
         """매매 기록을 DB로부터 로드 """
         recordsList = []
         with self.con:
             cur = self.con.cursor()
             items = "id, entryDate, product, contracts, position, profit, ticks, tradingType \
                      , reasonBuy, description, star"
-            cur.execute("SELECT {0} FROM Records".format(items))
-            rows = cur.fetchall()
+            
+            #전체 데이터 갯수를 구함
+            cur.execute("SELECT seq FROM sqlite_sequence WHERE name = ?",("Records",))
+            lastIndex = cur.fetchall()[0][0]-20*page
+            
+            #레코드를 20개씩 불러옴
+            cur.execute("SELECT {0} FROM Records LIMIT 20 OFFSET {1}".format(items,lastIndex))
+            rows = cur.fetchmany(20)
             for row in rows:
                 record = {}
                 record['index'] = row[0]

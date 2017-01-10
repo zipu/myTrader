@@ -1,0 +1,34 @@
+#equityDiv {
+    width:100%;
+}
+
+.freqDiv {
+    height: 300px;
+    width:50%;
+    float: right;
+}
+
+.compDiv {
+    height: 300px;
+    width: 50%;
+    float: left;
+}
+
+.timeframe-comp {
+    position: relative;
+    top: 35px;
+    left: 35px;
+    z-index: 1;
+}
+
+.timeframe {
+    position: absolute;
+    top: 30px;
+    left: 35px;
+    z-index: 1;
+    font-weight: bold;
+}
+
+.btn {
+    font-weight: bold;
+}

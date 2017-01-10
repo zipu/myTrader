@@ -7,26 +7,22 @@
     "test": "karma start",
     "build": "rimraf dist && webpack --config config/webpack.prod.js --progress --profile --bail"
   },
-  "licenses": [{
-    "type": "MIT",
-    "url": "https://github.com/angular/angular.io/blob/master/LICENSE"
-  }],
+  "license": "MIT",
   "dependencies": {
-    "@angular/common": "~2.2.0",
-    "@angular/compiler": "~2.2.0",
-    "@angular/core": "~2.2.0",
-    "@angular/forms": "~2.2.0",
-    "@angular/http": "~2.2.0",
-    "@angular/platform-browser": "~2.2.0",
-    "@angular/platform-browser-dynamic": "~2.2.0",
-    "@angular/router": "~3.2.0",
+    "@angular/common": "~2.4.0",
+    "@angular/compiler": "~2.4.0",
+    "@angular/core": "~2.4.0",
+    "@angular/forms": "~2.4.0",
+    "@angular/http": "~2.4.0",
+    "@angular/platform-browser": "~2.4.0",
+    "@angular/platform-browser-dynamic": "~2.4.0",
+    "@angular/router": "~3.4.0",
     "core-js": "^2.4.1",
-    "rxjs": "5.0.0-beta.12",
-    "zone.js": "^0.6.25",
+    "rxjs": "5.0.1",
+    "zone.js": "^0.7.4",
     "bootstrap": "^3.3.6"
   },
   "devDependencies": {
-    "@types/core-js": "^0.9.34",
     "@types/node": "^6.0.45",
     "@types/jasmine": "^2.5.35",
     "angular2-template-loader": "^0.4.0",

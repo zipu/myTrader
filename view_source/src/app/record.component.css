@@ -51,4 +51,7 @@ select[disabled] {
     padding-bottom: 3px;
 }
 
+.pagination {
+    cursor: pointer;
+}
 

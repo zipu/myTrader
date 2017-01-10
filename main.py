@@ -18,7 +18,7 @@ class Window(QMainWindow):
         
     def _initUI(self):
         self.setCentralWidget(self.view)
-        self.setMinimumSize(1300, 800)
+        self.setMinimumSize(1300, 900)
         self.setWindowTitle("Carpediem")
 
     def closeEvent(self, event):

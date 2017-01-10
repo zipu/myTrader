@@ -19,6 +19,7 @@ export class RecordComponent {
   //매매기록
   record: Record = new Record();
   recordsList: any[];
+  page: number;
 
   //종목 정보
   recordInfo: RecordInfo;
@@ -53,17 +54,30 @@ export class RecordComponent {
     this.isInfoForm = false;
     this.isRecordForm = false;
     this.filteringField = "";
-    this.getRecordsList();
+    this.page = 1;
+    this.getRecordsList(this.page);
     this.getInfo();
     this.getStrategy();
   }
 
+
+
   /** Methods for Record table */
     //DB로부터 레코드 불러옴
-  getRecordsList() {
-    this.recordDB.getRecordsList().then ( (data:any) => {
+  getRecordsList(page:number) {
+    this.recordDB.getRecordsList(page).then ( (data:any) => {
       this.recordsList = data;
     });
+  }
+
+  //pagination
+  paging(flag:number) {
+    if ((this.recordsList[this.recordsList.length-1].index == 1 && flag == 1)
+        || this.page+flag == 0 ){
+    } else {
+      this.page += flag;
+      this.getRecordsList(this.page)
+    }
   }
 
   /** Methods for Record Form */
@@ -86,6 +100,7 @@ export class RecordComponent {
       if (!checkProduct.length) { //product가 종목 정보 리스트에 있는지 확인
         this.commonService.pop_alert('Not valid product');
       } else {
+
           let newRecord = JSON.stringify(this.record);
           this.recordDB.saveRecord(newRecord);
           if (this.record.reasonBuy != null && this.strategies.indexOf(this.record.reasonBuy.toLowerCase()) == -1){
@@ -156,6 +171,9 @@ export class RecordComponent {
     this.getInfo();
   }
 
+  gotoOneNote(url:any){ // 원노트 링크
+    window.location.href=url;
+  }
 
   /** Methods for Auto completion */
   getStrategy(){
