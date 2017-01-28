@@ -1,6 +1,6 @@
 <nav class="navbar navbar-inverse navbar-fixed-top">
   <div class="container-fluid">
-    <a class="navbar-brand" href="#" style="color:gold;padding-left:2%">Imagine thd 40th day</a>
+    <a class="navbar-brand" href="#" style="color:gold;padding-left:2%">One Good Trend Will Pay Them All</a>
     <ul class="nav navbar-nav navbar-right ">
       <li><a [routerLink]="['/overview']">Menu1</a></li>
       <li><a [routerLink]="['/trading']">Menu2</a></li>
@@ -13,9 +13,10 @@
   <div class="row">
     <div class="col-sm-3 col-md-2 sidebar">
       <ul class="nav nav-sidebar">
-        <li [routerLinkActive]="['active']"><a [routerLink]="['/overview']">Overview<span class="sr-only">(current)</span></a></li>
-        <li [routerLinkActive]="['active']"><a [routerLink]="['/trading']">Trading</a></li>
-        <li [routerLinkActive]="['active']"><a [routerLink]="['/record']">Record</a></li>
+        <li routerLinkActive="active"><a routerLink="/overview">Overview<span class="sr-only">(current)</span></a></li>
+        <li routerLinkActive="active"><a routerLink="/market">Market</a></li>
+        <li routerLinkActive="active"><a routerLink="/trading">Trading</a></li>
+        <li routerLinkActive="active"><a routerLink="/record">Record</a></li>
       </ul>
     </div>
     <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">

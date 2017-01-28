@@ -10,6 +10,7 @@ import { OverviewComponent }   from './overview.component';
 import { TradingComponent }   from './trading.component';
 import { ChartComponent }   from './chart.component';
 import { RecordComponent }   from './record.component';
+import { MarketComponent } from './market.component'; 
 
 //services
 import { KiwoomService, CommonService }  from './app.service';
@@ -32,6 +33,7 @@ import { routing } from './app.routing';
         //ROUTER_DIRECTIVES,
         AppComponent,
         OverviewComponent,
+        MarketComponent,
         TradingComponent,
         ChartComponent,
         RecordComponent,

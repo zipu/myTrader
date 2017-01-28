@@ -1,0 +1,131 @@
+<div class="market-view row">
+    <!-- 로그인 버튼 -->
+    <div class="first row">
+        <div class="connect">
+            <span class="connect-indicator" [class.loggedin]="isConnected === true"></span>
+            <button type="button" class="btn btn-default" (click)="connect()">{{ isConnected? 'Logout' : 'Login'}}</button>
+            <button type="button" class="btn btn-default" (click)="test()">test</button>
+        </div>
+    </div>
+    <!-- 관심종목 화면 -->
+    <div class="second row">
+        <div class="products-list col-md-7">
+            <ul class="nav nav-tabs products">
+                <li [class.active]="market==products.market" *ngFor="let market of markets" (click)="selectMarket(market)">
+                    <a>{{market}}</a>
+                </li>
+                <li>
+                    <a></a>
+                    <li>
+            </ul>
+            <div class="products-container">
+                <table class="table table-condensed table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th style='width:6%'>
+                                <span class="glyphicon glyphicon-star"></span>
+                            </th>
+                            <th style='width:32%'>Product</th>
+                            <th style='width:14%'>Expiration</th>
+                            <th style='width:16%'>filter1</th>
+                            <th style='width:16%'>filter2</th>
+                            <th style='width:16%'>filter3</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let code of products.codes">
+                            <td class="fav-mark" (click)="addToFav(code)" style='width:6%'>
+                                <span [ngClass]="checkFav(code)? 'glyphicon glyphicon-star': 'glyphicon glyphicon-star-empty'"></span>
+                            </td>
+                            <td (click)="selectProduct(code)" style='width:32%'>{{products.list[code].name}}</td>
+                            <td (click)="selectMonth(code)" style='width:14%'>{{products.list[code].month}}</td>
+                            <td style='width:16%'></td>
+                            <td style='width:16%'></td>
+                            <td style='width:16%; text-align:right; padding-right:10px;'></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!--종목정보 화면 -->
+        <div class="p-info col-md-5">
+            <table class="table table-condensed table-bordered">
+                <tr>
+                    <th>기초상품</th>
+                    <td style='font-size:13px;padding:0px;'>{{productInfo? products.selectedProduct : ''}}</td>
+                    <th>거래소</th>
+                    <td>{{productInfo? productInfo.market : ''}}</td>
+                </tr>
+                <tr>
+                    <th>기준통화</th>
+                    <td>{{productInfo? productInfo.currency : ''}}</td>
+                    <th>위탁증거금</th>
+                    <td>{{productInfo? productInfo.margin : ''}}</td>
+                </tr>
+                <tr>
+                    <th>최종거래일</th>
+                    <td>{{productInfo? productInfo.expirate : ''}}</td>
+                    <th>영업일자</th>
+                    <td>{{productInfo? productInfo.openDate : ''}}</td>
+                </tr>
+                <tr>
+                    <th>틱가치</th>
+                    <td>{{productInfo? productInfo.tickValue : ''}}</td>
+                    <th>잔존만기</th>
+                    <td>{{productInfo? productInfo.remained : ''}}</td>
+                </tr>
+                <tr>
+                    <th>장시작시간</th>
+                    <td>{{productInfo? productInfo.openTime : ''}}</td>
+                    <th>장마감시간</th>
+                    <td>{{productInfo? productInfo.closeTime : ''}}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div class="second row">
+        <!-- 차트화면 -->
+        <div class="chart col-md-7">
+            <my-chart *ngIf="selectedProduct" [product]="selectedProduct"></my-chart>
+        </div>
+        <!-- 호가정보 화면 -->
+        <div class="hoga col-md-5">
+            <p> test </p>
+        </div>
+    </div>
+    <!-- Modal Screen -->
+    <div *ngIf="isModalOn" class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button (click)="modalClose()" class="close">&times;</button>
+                    <h4 class="modal-title">{{modalTitle}}</h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-condensed table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th style='width:6%'><span class="glyphicon glyphicon-star"></span></th>
+                                <th style='width:24%'>Code</th>
+                                <th style='width:24%'>Expiration</th>
+                                <th style='width:24%'>Price</th>
+                                <th style='width:24%'>Volumn</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let code of modalProducts.codes">
+                                <td class="fav-mark" (click)="addToFav(code)" style='width:6%;cursor:pointer;'>
+                                    <span [ngClass]="checkFav(code)? 'glyphicon glyphicon-star': 'glyphicon glyphicon-star-empty'"></span>
+                                </td>
+                                <td (click)="selectProduct(code)" style='width:24%'>{{modalProducts.list[code].name}}</td>
+                                <td style='width:24%'>{{modalProducts.list[code].month}}</td>
+                                <td style='width:24%'></td>
+                                <td style='width:24%; text-align:right; padding-right:15px;'></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -9,7 +9,7 @@
     </div>
     <!--==============  여기서부터 매매기록 창 =====================-->
     <div class="record-form" *ngIf="isRecordForm">
-        <form (keyup)="deleteKorean($event)">
+        <form >
             <fieldset class="form-group col-sm-4">
                 <label for="entryDate">Entry date</label>
                 <input class="form-control" type="datetime-local" [(ngModel)]="record.entryDate" name="entryDate">

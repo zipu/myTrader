@@ -50,7 +50,7 @@ class MainView(QWebEngineView):
         self.devTool = QDialog(self)
         self.devTool.setWindowTitle("Development Tool")
         self.devTool.resize(950, 400)
-        self.devView = DevToolView("8888")
+        self.devView = DevToolView("9999")
 
         layout = QGridLayout()
         layout.setContentsMargins(0, 0, 0, 0)

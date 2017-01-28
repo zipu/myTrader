@@ -206,7 +206,7 @@ export class RecordComponent {
     this.filteredList = []; //필터링 목록은 초기화
   }
 
-    //한글 타이핑시 두번씩 입력 되는거 삭제
+    //한글 타이핑시 두번씩 입력 되는거 삭제 --> qt 5.7.1에서 deprecated
   deleteKorean(event:any){
       let lastChar =  event.target.value.substr(-1);
       if (lastChar.match('[^\u0000-\u007F]+') && event.keyCode != 8 && event.keyCode != 16 ) {

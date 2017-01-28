@@ -123,7 +123,6 @@ class Kiwoom(KiwoomAPI):
             isRecent = True if codeinfo[-2] == '1' else False
             data[code] = {"name":name, "month":month, "isActive":isActive, "isRecent":isRecent}
         
-        
         return data
 
     @pyqtSlot(QVariant)
@@ -162,7 +161,7 @@ class Kiwoom(KiwoomAPI):
             volumn = self.GetCommData(trCode, rqName, i, "누적거래량")
             data[code].append(format(int(volumn), ',d'))
 
-        self.bridge.emit("onProducts", dict(data))
+        self.bridge.emit("_onProducts", dict(data))
 
 
 

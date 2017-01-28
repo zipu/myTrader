@@ -43,7 +43,7 @@ def main():
     #(opt, args) = parser.parse_args()
 
     #if os.path.isfile(opt.file):
-    os.environ["QTWEBENGINE_REMOTE_DEBUGGING"] = "0.0.0.0: 8888"
+    os.environ["QTWEBENGINE_REMOTE_DEBUGGING"] = "0.0.0.0: 9999"
     app = QApplication(sys.argv)
     window = Window("view_source/dist/index.html")
     window.show()

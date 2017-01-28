@@ -90,4 +90,8 @@ export class CommonService {
           datetime: yyyy+'-'+mm+'-'+dd+'T'+hours+':'+minutes,
       }
     }
+
+    logging(title:string, data:any){
+        console.info("%c### "+title+": ", "color:blue", data);
+    }
 }

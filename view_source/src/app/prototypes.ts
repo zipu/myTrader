@@ -1,3 +1,16 @@
+/**** Market Component ****/
+export class Products {
+  market: string;  //시장 구분
+  codes: string[]; //종목 코드 리스트
+  selectedProduct: string; //선택된 종목
+  list: Object; //상품목록 세부 정보
+  constructor(market: string=''){
+    this.market = market;
+    this.codes = [];
+  }   
+}
+
+
 export class Product {
   code: string;
   name: string;
@@ -15,6 +28,8 @@ export class Product {
   }
 }
 
+
+// this will be deprecated.. 
 export class ProductInfo {
   market: string;
   currency: string;
@@ -26,6 +41,10 @@ export class ProductInfo {
   openTime: string;
   closeTime: string;
 }
+
+
+
+/***** RecordComponent *****/
 
 export class Record {
 
