@@ -6,6 +6,7 @@ from .kiwoomAPI import KiwoomAPI
 from .util import util
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, QVariant
 
+
 class Kiwoom(KiwoomAPI):
     """
      Event Handler Usage:
@@ -56,7 +57,8 @@ class Kiwoom(KiwoomAPI):
 
 
     def sendRequest(self, rqName, trCode, scrNo, inputValue, preNext=""):
-        """Send Rquest to the server.
+        """
+        Action: Send Rquest to the server
         Args:
             rQname (str) : request name  ex) "기본정보"
             trCode (str) : trcode ex) "opt10001"
@@ -134,6 +136,8 @@ class Kiwoom(KiwoomAPI):
         util.toFile('favorite', codes)
 
 
+    # !!!!!!!  더이상 사용하지 않음 !!!!!!! #
+    # !!!!!!!  더이상 사용하지 않음 !!!!!!! #
     @pyqtSlot(str, QVariant)
     def requestProductsReal(self, scrNo, inputValue):
         """
@@ -147,6 +151,8 @@ class Kiwoom(KiwoomAPI):
         #else:
         self.sendRequest("관심종목", "opt10005", scrNo, inputValue)
 
+    # !!!!!!!  더이상 사용하지 않음 !!!!!!! #
+    # !!!!!!!  더이상 사용하지 않음 !!!!!!! #
     @KiwoomAPI.on('OnReceiveTrData', screen='0001')
     def _onTrProducts(self, scrNo, rqName, trCode, fieldName, preNext):
         """
@@ -213,6 +219,7 @@ class Kiwoom(KiwoomAPI):
     ##                          Modal Info Screen                       ##
     ##                            (Screen : 0003)                       ##
     ######################################################################
+    # !!!!!!!!!!!!!!!!!!!!!! 더이상 사용 안함 !!!!!!!!!!!!!!!!!!!!!!!1!!! #
     @KiwoomAPI.on('OnReceiveTrData', screen='0003')
     def _onTrModal(self, scrNo, rqName, trCode, fieldName, preNext):
         """

@@ -44,6 +44,8 @@ def main():
 
     #if os.path.isfile(opt.file):
     os.environ["QTWEBENGINE_REMOTE_DEBUGGING"] = "0.0.0.0: 9999"
+    os.environ["QT_LOGGING_RULES"] = "js=false"
+
     app = QApplication(sys.argv)
     window = Window("view_source/dist/index.html")
     window.show()

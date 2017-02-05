@@ -343,6 +343,7 @@ function QObject(name, data, webChannel)
                     "method": methodIdx,
                     "args": args
                 }, function(response) {
+                // customized part
                     if (response !== undefined) {
                         var result = object.unwrapQObject(response);
                         if (result == null || result.succeed == undefined)
