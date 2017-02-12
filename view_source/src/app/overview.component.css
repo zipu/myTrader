@@ -22,7 +22,7 @@
 }
 
 .timeframe {
-    position: absolute;
+    position: relative;
     top: 30px;
     left: 35px;
     z-index: 1;
@@ -31,4 +31,8 @@
 
 .btn {
     font-weight: bold;
+}
+
+.deposit-form {
+    z-index: 2;
 }

@@ -9,12 +9,25 @@
     </div>
     <!--==============  여기서부터 매매기록 창 =====================-->
     <div class="record-form" *ngIf="isRecordForm">
-        <form >
+        <form>
             <fieldset class="form-group col-sm-4">
                 <label for="entryDate">Entry date</label>
                 <input class="form-control" type="datetime-local" [(ngModel)]="record.entryDate" name="entryDate">
             </fieldset>
-            <fieldset class="form-group col-sm-2">
+            <fieldset class="form-group col-sm-4">
+                <label for="entryDate">Exit date</label>
+                <input class="form-control" type="datetime-local" name="exitDate" [(ngModel)]="record.exitDate">
+            </fieldset>
+            <fieldset class="form-group col-sm-4">
+                <label for="strategy">Strategy</label>
+                <input type="text" class="form-control" name="strategy" [(ngModel)]="record.strategy" (keyup)="filter('strategy')">
+                <div class="list-group" *ngIf="filteringField=='strategy'">
+                    <button type="button" class="list-group-item" (click)="select(item)" *ngFor="let item of filteredList">
+                            {{item}}
+                    </button>
+                </div>
+            </fieldset>
+            <fieldset class="form-group col-sm-3">
                 <label for="product">Product</label>
                 <input type="text" name="product" class="form-control" [(ngModel)]="record.product" (keyup)="filter('product')">
                 <div class="list-group" *ngIf="filteringField=='product'">
@@ -23,77 +36,52 @@
                     </button>
                 </div>
             </fieldset>
-            <fieldset class="form-group col-sm-2">
+            <fieldset class="form-group col-sm-3">
                 <label for="contracts">Contracts</label>
                 <input type="number" min="1" class="form-control" name="contracts" [(ngModel)]="record.contracts">
             </fieldset>
-            <fieldset class="form-group col-sm-2">
+            <fieldset class="form-group col-sm-3">
                 <label for="position">Position</label>
                 <select class="form-control" name="position" [(ngModel)]="record.position">
                     <option value="Long">Long</option>
                     <option value="Short">Short</option>
                 </select>
             </fieldset>
-            <fieldset class="form-group col-sm-2">
-                <label for="commission">Commission</label>
-                <input type="number" class="form-control" name="commission" [(ngModel)]="record.commission">
-            </fieldset>
-            <fieldset class="form-group col-sm-2">
-                <label for="priceOpen">Open</label>
-                <input type="number" class="form-control" name="priceOpen" [(ngModel)]="record.priceOpen">
-            </fieldset>
-            <fieldset class="form-group col-sm-2">
-                <label for="priceHigh">High</label>
-                <input type="number" class="form-control" name="priceHigh" [(ngModel)]="record.priceHigh">
-            </fieldset>
-            <fieldset class="form-group col-sm-2">
-                <label for="priceLow">Low</label>
-                <input type="number" class="form-control" name="priceLow" [(ngModel)]="record.priceLow">
-            </fieldset>
-            <fieldset class="form-group col-sm-2">
-                <label for="priceClose">Close</label>
-                <input type="number" class="form-control" name="priceClose" [(ngModel)]="record.priceClose">
-            </fieldset>
-            <fieldset class="form-group col-sm-4">
-                <label for="entryDate">Exit date</label>
-                <input class="form-control" type="datetime-local" name="exitDate" [(ngModel)]="record.exitDate">
-            </fieldset>
-            <fieldset class="form-group col-sm-4">
-                <label for="reasonBuy">Reason to buy</label>
-                <input type="text" class="form-control" name="reasonBuy" [(ngModel)]="record.reasonBuy" (keyup)="filter('reasonBuy')">
-                <div class="list-group" *ngIf="filteringField=='reasonBuy'">
-                    <button type="button" class="list-group-item" (click)="select(item)" *ngFor="let item of filteredList">
-                            {{item}}
-                    </button>
-                </div>
-            </fieldset>
-            <fieldset class="form-group col-sm-2">
+            <fieldset class="form-group col-sm-3">
                 <label for="lossCut">Loss cut</label>
                 <input type="number" class="form-control" name="lossCut" [(ngModel)]="record.lossCut">
             </fieldset>
-            <fieldset class="form-group col-sm-4">
-                <label for="reasonSell">Reason to sell</label>
-                <input type="text" class="form-control" name="reasonSell" [(ngModel)]="record.reasonSell">
+            <fieldset class="form-group col-sm-3">
+                <label for="priceOpen">Open</label>
+                <input type="number" class="form-control" name="priceOpen" [(ngModel)]="record.priceOpen">
             </fieldset>
-            <fieldset class="form-group col-sm-2">
+            <fieldset class="form-group col-sm-3">
+                <label for="priceClose">Close</label>
+                <input type="number" class="form-control" name="priceClose" [(ngModel)]="record.priceClose">
+            </fieldset>
+            <fieldset class="form-group col-sm-3">
+                <label for="pnl">P/L</label>
+                <input type="number" class="form-control" name="pnl">
+            </fieldset>
+            <fieldset class="form-group col-sm-3">
                 <label for="description">Description</label>
                 <input type="text" class="form-control" name="description" [(ngModel)]="record.description">
             </fieldset>
             <fieldset class="form-group col-sm-3">
                 <label for="profit">Profit</label>
-                <input type="number" class="form-control" name="profit" [(ngModel)]="record.profit" disabled>
+                <input type="number" class="form-control" name="profit" [(ngModel)]="record.profit" readonly>
             </fieldset>
             <fieldset class="form-group col-sm-3">
                 <label for="ticks">Ticks</label>
-                <input type="number" class="form-control" name="ticks" [(ngModel)]="record.tick" disabled>
+                <input type="number" class="form-control" name="ticks" [(ngModel)]="record.ticks" readonly>
             </fieldset>
             <fieldset class="form-group col-sm-3">
                 <label for="duration">Duration</label>
-                <input type="text" class="form-control" name="duration" [(ngModel)]="record.duration" disabled>
+                <input type="text" class="form-control" name="duration" [(ngModel)]="record.duration" readonly>
             </fieldset>
             <fieldset class="form-group col-sm-3">
-                <label for="tradingType">Trading type</label>
-                <input type="text" class="form-control" name="tradingType" [(ngModel)]="record.tradingType" disabled>
+                <label for="commission">Commission</label>
+                <input type="number" class="form-control" name="commission" [(ngModel)]="record.commission" readonly>
             </fieldset>
         </form>
         <fieldset class="form-group col-sm-12">
@@ -146,14 +134,13 @@
                 <th style='width:5%'>#</th>
                 <th style='width:10%'>Date</th>
                 <th style='width:14%'>Product</th>
-                <th style='width:5%'>Cons</th>
-                <th style='width:7%'>Position</th>
+                <th style='width:6%'>Cons</th>
+                <th style='width:8%'>Position</th>
                 <th style='width:10%'>Profit</th>
                 <th style='width:9%'>Ticks</th>
                 <th style='width:10%'>Time Frame</th>
-                <th style='width:15%'>Strategy</th>
+                <th style='width:18%'>Strategy</th>
                 <th style='width:10%'>Detail</th>
-                <th style='width:5%'>Star</th>
             </tr>
         </thead>
         <tbody>
@@ -161,14 +148,13 @@
                 <td style='width:5%' (click)="getRecord(row.index)">{{row.index}}</td>
                 <td style='width:10%' (click)="getRecord(row.index)">{{row.entryDate}}</td>
                 <td style='width:14%' (click)="getRecord(row.index)">{{row.product}}</td>
-                <td style='width:5%' (click)="getRecord(row.index)">{{row.contracts}}</td>
-                <td style='width:7%' (click)="getRecord(row.index)" [style.color]="row.position=='Long'? 'purple': 'green'">{{row.position}}</td>
+                <td style='width:6%' (click)="getRecord(row.index)">{{row.contracts}}</td>
+                <td style='width:8%' (click)="getRecord(row.index)" [style.color]="row.position=='Long'? 'purple': 'green'">{{row.position}}</td>
                 <td style='width:10%' (click)="getRecord(row.index)" [style.color]="row.profit > 0 ? 'blue': 'red'" class="dollar">{{row.profit}}</td>
                 <td style='width:9%' (click)="getRecord(row.index)" [style.color]="row.ticks > 0 ? 'blue': 'red'">{{row.ticks}}</td>
                 <td style='width:10%' (click)="getRecord(row.index)">{{row.tradingType}}</td>
-                <td style='width:15%' (click)="getRecord(row.index)">{{row.reasonBuy}}</td>
+                <td style='width:18%' (click)="getRecord(row.index)">{{row.strategy}}</td>
                 <td style='width:10%' (click)="gotoOneNote(row.description)"><a *ngIf="row.description" style="cursor: pointer;">link</a></td>
-                <td style='width:5%' (click)="getRecord(row.index)">{{row.star}}</td>
             </tr>
         </tbody>
     </table>

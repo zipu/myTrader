@@ -1,4 +1,5 @@
 #-*-coding: utf-8 -*-
+# pylint: disable=E1101,E0611
 import logging
 import sqlite3 as lite
 from datetime import datetime
@@ -13,7 +14,6 @@ class Record(QObject):
         super().__init__()
         self.logger = logging.getLogger(__name__)
         self.con = lite.connect("./data/record.db")
-        self.deposit = self.getBalance()['deposit']    
 
 
     ######################################################################
@@ -26,85 +26,91 @@ class Record(QObject):
     @pyqtSlot(result=QVariant)
     def getAllData(self):
 
-        with self.con:
-            cur = self.con.cursor()
-            items = "entryDate, profit, profitHigh, profitLow, \
-                     ticks, ticksHigh, ticksLow, commission"
-            cur.execute("SELECT {0} FROM Records".format(items))
-            rows = cur.fetchall()
+        #with self.con:
+        #    cur = self.con.cursor()
+        #    items = "entryDate, profit, ticks, commission"
+        #    cur.execute("SELECT {0} FROM Records".format(items))
+        #    rows = cur.fetchall()
+
+        items = "entryDate, profit, ticks, commission"
+        rawData = pd.read_sql_query("SELECT {0} FROM Records".format(items), self.con)
+        deposit = util.load("private")['deposit']
 
         #raw data용 pandas DataFrame 생성
-        cols = ['date', 'profit', 'profitHigh', 'profitLow', 'ticks', 'ticksHigh',
-                'ticksLow', 'commission']
-        rawData = pd.DataFrame(rows, columns=cols)
+        #cols = ['date', 'profit', 'profitHigh', 'profitLow', 'ticks', 'ticksHigh',
+        #        'ticksLow', 'commission']
+        #rawData = pd.DataFrame(rows, columns=cols)
 
         #가공된 data용 Data frame
-        cols = ['date', 'profitOpen', 'profitHigh', 'profitLow', 'profitClose', 
-                'ticksOpen', 'ticksHigh', 'ticksLow','ticksClose', 'commission']
+        cols = ['date', 'profitOpen', 'profitHigh', 'profitLow', 'profitClose',
+                'ticksOpen', 'ticksClose', 'commission']
         data = pd.DataFrame(columns=cols)
-        data.date = pd.to_datetime(rawData.date)
+        data.date = pd.to_datetime(rawData.entryDate)
 
         #profit OHLC
-        data.profitClose = rawData.profit.cumsum()
+        data.profitClose = rawData.profit.cumsum() + deposit
         data.profitOpen = data.profitClose.shift(1)
-        data.ix[0,'profitOpen'] = 0
-        data.profitHigh = data.profitOpen + rawData.profitHigh
-        data.profitLow = data.profitOpen + rawData.profitLow
+        data.ix[0, 'profitOpen'] = deposit
         data.profitOpen = data.profitOpen - rawData.commission
+        data.profitHigh = np.where(data.profitOpen > data.profitClose, data.profitOpen, data.profitClose)
+        data.profitLow = np.where(data.profitOpen > data.profitClose, data.profitClose, data.profitOpen)
 
-        #ticks OHLC
+        #ticks
         data.ticksClose = rawData.ticks.cumsum()
         data.ticksOpen = data.ticksClose.shift(1)
-        data.ix[0,'ticksOpen'] = 0
-        data.ticksHigh = data.ticksOpen + rawData.ticksHigh
-        data.ticksLow = data.ticksOpen + rawData.ticksLow
+        data.ix[0, 'ticksOpen'] = 0
+
+        #convert date to unix epoch time
+        #data['timestamp'] = data.date.map(lambda x: pd.Timestamp(x).timestamp()*1000)
+        data['timestamp'] = data.date.astype("int64")/1000000
 
         #commission
         data.commission = rawData.commission.cumsum()
-        data['timestamp'] = data.date.map(lambda x: pd.Timestamp(x).timestamp()*1000)
 
         #volume
         data['volume'] = 1
 
         #normalized data
         data['profit_norm'] = (data.profitClose-data.profitClose.min())/(data.profitClose.max()-data.profitClose.min())*100
-        data['profit_norm'] = data.profit_norm.map(lambda x: round(x,2))
+        #data['profit_norm'] = data.profit_norm.map(lambda x: round(x,2))
         data['ticks_norm'] =(data.ticksClose-data.ticksClose.min())/(data.ticksClose.max()-data.ticksClose.min())*100
-        data['ticks_norm'] = data.ticks_norm.map(lambda x: round(x,2))
+        #data['ticks_norm'] = data.ticks_norm.map(lambda x: round(x,2))
         #result (win:1, lose:0)
-        data['result'] = np.where(rawData.ticks>0,1,0)
+        data['result'] = np.where(rawData.ticks > 0, 1, 0)
 
         #cumulative winrate
         data['winrate'] = (data.result.cumsum()/(data.index+1))*100
-        data['winrate'] = data.winrate.map(lambda x: round(x,2))
+        #data['winrate'] = data.winrate.map(lambda x: round(x,2))
 
         #frequncy data
         freqTable = pd.DataFrame()
-        
-        ticks_min = rawData.ticks.min() - (rawData.ticks.min()%5)-2.5 
-        ticks_max = rawData.ticks.max() + (rawData.ticks.min()%5)+2.5 
-        ticks_rng = np.arange(ticks_min,ticks_max,5) #data range
-        freqTable['ticks_rng']= ticks_rng[:-1]+2.5
+        ticks_min = rawData.ticks.min() - (rawData.ticks.min()%5)-2.5
+        ticks_max = rawData.ticks.max() + (rawData.ticks.min()%5)+2.5
+        ticks_rng = np.arange(ticks_min, ticks_max, 5) #data range
+        freqTable['ticks_rng'] = ticks_rng[:-1]+2.5
         freqTable['ticks_freq'] = rawData.ticks.groupby(pd.cut(rawData.ticks, ticks_rng)).count().values
         freqTable['ticks_freqP'] = (freqTable['ticks_freq']/freqTable['ticks_freq'].sum())*100
-        freqTable['ticks_freqP'] = freqTable.ticks_freqP.map(lambda x: round(x,2))
+        #freqTable['ticks_freqP'] = freqTable.ticks_freqP.map(lambda x: round(x,2))
 
         #web에 전달할 dictionary object 생성
         dataDict = {}
-        dataDict['profitOHLC'] = data[['timestamp','profitOpen','profitHigh','profitLow','profitClose']].values.tolist() 
-        dataDict['tickOHLC'] = data[['timestamp','ticksOpen','ticksHigh','ticksLow','ticksClose']].values.tolist() 
-        dataDict['volume'] = data[['timestamp','volume']].values.tolist()
-        dataDict['commission'] = data[['timestamp','commission']].values.tolist()
-        dataDict['result'] = data[['timestamp','result']].values.tolist()
-        dataDict['winrate'] = data[['timestamp','winrate']].values.tolist()
-        dataDict['profit'] = data[['timestamp','profit_norm']].values.tolist()
-        dataDict['ticks'] = data[['timestamp','ticks_norm']].values.tolist()
-        dataDict['freq_ticks'] = freqTable[['ticks_rng','ticks_freqP']].values.tolist()
-        
+        dataDict['profitOHLC'] = data[['timestamp', 'profitOpen', 'profitHigh', 'profitLow', 'profitClose']].values.tolist() 
+        dataDict['tickOHLC'] = data[['timestamp', 'ticksOpen','ticksClose']].values.tolist() 
+        dataDict['volume'] = data[['timestamp', 'volume']].values.tolist()
+        dataDict['commission'] = data[['timestamp', 'commission']].values.tolist()
+        dataDict['result'] = data[['timestamp', 'result']].values.tolist()
+        dataDict['winrate'] = data[['timestamp', 'winrate']].values.tolist()
+        dataDict['profit'] = data[['timestamp', 'profit_norm']].values.tolist()
+        dataDict['ticks'] = data[['timestamp', 'ticks_norm']].values.tolist()
+        dataDict['freq_ticks'] = freqTable[['ticks_rng', 'ticks_freqP']].values.tolist()
+
         return dataDict
 
-    def getBalance(self):
-        return util.load("private")['balance']
+    @pyqtSlot(float)
+    def saveDeposit(self, dep):
+        data = util.load('private')
+        data['deposit'] = round(data['deposit'] + dep,2)
+        util.toFile('private', data)
 
 
     ######################################################################
@@ -137,35 +143,35 @@ class Record(QObject):
         if ('priceClose' in newRecord) and newRecord['priceClose']:
             (newRecord['ticks'], newRecord['profit']) \
              = self.calcDiff(productInfo, newRecord['position'], newRecord['contracts'], newRecord['priceOpen'], newRecord['priceClose'])
-            if ('priceHigh' not in newRecord) or (not newRecord['priceHigh']):
-                newRecord['priceHigh'] = newRecord['priceOpen'] if newRecord['priceOpen'] > newRecord['priceClose'] else newRecord['priceClose']
-            if ('priceLow' not in newRecord) or (not newRecord['priceLow']):
-                newRecord['priceLow'] = newRecord['priceClose'] if newRecord['priceOpen'] > newRecord['priceClose'] else newRecord['priceOpen']
-            (ticksHigh, profitHigh) \
-                   = self.calcDiff(productInfo, newRecord['position'], newRecord['contracts'], newRecord['priceOpen'], newRecord['priceHigh'])
-            (ticksLow, profitLow) \
-                   = self.calcDiff(productInfo, newRecord['position'], newRecord['contracts'], newRecord['priceOpen'], newRecord['priceLow'])
-            
-            if newRecord['position'] == 'Long':
-                newRecord['ticksHigh'] = ticksHigh
-                newRecord['profitHigh'] = profitHigh
-                newRecord['ticksLow'] = ticksLow
-                newRecord['profitLow'] = profitLow
-            else:
-                newRecord['ticksHigh'] = ticksLow
-                newRecord['profitHigh'] = profitLow
-                newRecord['ticksLow'] = ticksHigh
-                newRecord['profitLow'] = profitHigh
-        
-        if ('reasonBuy' in newRecord) and newRecord['reasonBuy']:
-            newRecord['reasonBuy'] = newRecord['reasonBuy'].lower()
+            #if ('priceHigh' not in newRecord) or (not newRecord['priceHigh']):
+            #    newRecord['priceHigh'] = newRecord['priceOpen'] if newRecord['priceOpen'] > newRecord['priceClose'] else newRecord['priceClose']
+            #if ('priceLow' not in newRecord) or (not newRecord['priceLow']):
+            #    newRecord['priceLow'] = newRecord['priceClose'] if newRecord['priceOpen'] > newRecord['priceClose'] else newRecord['priceOpen']
+            #(ticksHigh, profitHigh) \
+            #       = self.calcDiff(productInfo, newRecord['position'], newRecord['contracts'], newRecord['priceOpen'], newRecord['priceHigh'])
+            #(ticksLow, profitLow) \
+            #       = self.calcDiff(productInfo, newRecord['position'], newRecord['contracts'], newRecord['priceOpen'], newRecord['priceLow'])
+
+            #if newRecord['position'] == 'Long':
+            #    newRecord['ticksHigh'] = ticksHigh
+            #    newRecord['profitHigh'] = profitHigh
+            #    newRecord['ticksLow'] = ticksLow
+            #    newRecord['profitLow'] = profitLow
+            #else:
+            #    newRecord['ticksHigh'] = ticksLow
+            #    newRecord['profitHigh'] = profitLow
+            #    newRecord['ticksLow'] = ticksHigh
+            #    newRecord['profitLow'] = profitHigh
+
+        if ('strategy' in newRecord) and newRecord['strategy']:
+            newRecord['strategy'] = newRecord['strategy'].lower()
 
         if ('description' in newRecord) and newRecord['description']:
             link = newRecord['description']
             ind = link.find('onenote')
             if ind is not -1:
                 newRecord['description'] = link[ind:]
-        
+
         #save to DB
         curId = newRecord.pop('index') #레코드에서 인덱스를 없애야함, id는 검색할때 필요
         #new Record
@@ -186,7 +192,7 @@ class Record(QObject):
         """ 가격 차이 계산 """
         from decimal import Decimal, getcontext #부동 소숫점 연산
         getcontext().prec = 6
-        
+
         sign = 1 if position == 'Long' else -1
         unit = Decimal(info['tickPrice'])
         value = Decimal(info['tickValue'])
@@ -207,7 +213,7 @@ class Record(QObject):
         with self.con:
             cur = self.con.cursor()
             items = "id, entryDate, product, contracts, position, profit, ticks, tradingType \
-                     , reasonBuy, description, star"
+                     , strategy, description"
             
             #전체 데이터 갯수를 구함
             cur.execute("SELECT seq FROM sqlite_sequence WHERE name = ?",("Records",))
@@ -226,9 +232,8 @@ class Record(QObject):
                 record['profit'] = row[5]
                 record['ticks'] = row[6]
                 record['tradingType'] = row[7]
-                record['reasonBuy'] = row[8]
+                record['strategy'] = row[8]
                 record['description'] = row[9]
-                record['star'] = row[10]
                 recordsList.insert(0, record)
         return recordsList
     
@@ -248,23 +253,23 @@ class Record(QObject):
                 position=data[5],
                 priceOpen=data[6],
                 priceClose=data[7],
-                priceHigh=data[8],
-                priceLow=data[9],
+                #priceHigh=data[8],
+                #priceLow=data[9],
                 commission=data[10],
                 profit=data[11],
                 ticks=data[12],
                 duration=data[13],
                 tradingType=data[14],
-                reasonBuy=data[15],
-                reasonSell=data[16],
+                #reasonBuy=data[15],
+                #reasonSell=data[16],
                 lossCut=data[17],
                 description=data[18],
-                isPlanned=data[19],
-                star=data[20],
-                profitHigh=data[21],
-                profitLow=data[22],
-                ticksHigh=data[23],
-                ticksLow=data[24]
+                #isPlanned=data[19],
+                strategy=data[20],
+                #profitHigh=data[21],
+                #profitLow=data[22],
+                #ticksHigh=data[23],
+                #ticksLow=data[24]
             )
         return record
 

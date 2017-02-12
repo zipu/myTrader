@@ -1,4 +1,27 @@
 <div class="overview-view row">
+    <div class="deposit-row">
+        <div class="col-md-12">
+            <button (click)="isDepositForm = !isDepositForm" class="btn btn-default" style="float:right; margin-right:10px">
+            <i class="glyphicon glyphicon-usd"></i>
+        </button>
+        </div>
+        <div class="deposit-form"  *ngIf="isDepositForm">
+            <form class="form-inline" style="width:100%">
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-addon">$</div>
+                        <input type="text" class="form-control" name="deposit" [(ngModel)]="deposit" readonly>
+                    </div>
+                </div>
+                <div class="form-group" style="margin-left:20px">
+                    <div class="input-group">
+                        <input type="number" name="newDepo" class="form-control" [(ngModel)]="inputAmount">
+                    </div>
+                </div>
+                <button type="submit" (click)="saveDeposit(inputAmount)" class="btn btn-primary">Deposit</button>
+            </form>
+        </div>
+    </div>
     <div class="first-row">
         <div class="timeframe">
             <button class="btn btn-default btn-xs" type="button" (click)="timeFrame('tick', 1)">T</button>

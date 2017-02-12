@@ -14,7 +14,7 @@ export class OverviewComponent{
   equityChart:any;
   compChart: any;
   freqChart: any;
-  
+
   @ViewChild('equityDiv')
   equityDiv: ElementRef;
 
@@ -24,6 +24,10 @@ export class OverviewComponent{
   @ViewChild('freqDiv')
   freqDiv:any;
 
+  deposit: number; //총 입금액
+  inputAmount: number; //신규 입금(출금)액
+  isDepositForm:boolean = false;
+  
   ngOnInit() {
     //historyDB object 로드 끝날때까지 기다림
     if (( < any > window).recordDB == undefined) {
@@ -34,19 +38,32 @@ export class OverviewComponent{
       this.recordDB = (<any>window).recordDB;
       //highchart global option 
       Highcharts.setOptions({
-        global: {
-            timezoneOffset: -8 * 60 //중국 UTC +8:00 
-        }
+       // global: {
+       //     timezoneOffset: -8 * 60 //중국 UTC +8:00 
+       //}
+          tooltip: {
+              valueDecimals: 2
+          },
       });
       this.getData();
     }
   }
 
+  saveDeposit(dep:number){
+    this.recordDB.saveDeposit(dep);
+    this.deposit = this.deposit + dep;
+    this.inputAmount = undefined;
+    this.getData();
+  }
+
   getData() {
     this.recordDB.getAllData().then( (source:any)=> {
+
         this.drawEquityChart(source);
         this.drawCompChart(source);
         this.drawFreqChart(source);
+        this.deposit = source.profitOHLC[0][1] + source.commission[0][1];
+
         console.log(source);
     });
   }

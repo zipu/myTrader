@@ -103,8 +103,8 @@ export class RecordComponent {
 
           let newRecord = JSON.stringify(this.record);
           this.recordDB.saveRecord(newRecord);
-          if (this.record.reasonBuy != null && this.strategies.indexOf(this.record.reasonBuy.toLowerCase()) == -1){
-            this.recordDB.addStrategy(this.record.reasonBuy);
+          if (this.record.strategy != null && this.strategies.indexOf(this.record.strategy.toLowerCase()) == -1){
+            this.recordDB.addStrategy(this.record.strategy);
           }
 
           this.myInit();
@@ -188,7 +188,7 @@ export class RecordComponent {
 
     if (name == 'product') {
       initialList = this.products;
-    } else if (name == 'reasonBuy'){
+    } else if (name == 'strategy'){
       initialList = this.strategies;
     }
 
