@@ -43,6 +43,7 @@ class util(object):
     def toFile(dest, data, ftype='json'):
         
         if ftype=='json':
+            #old_data = util.load(dest)
             with open('./data/%s.json'%(dest), 'w+', encoding='utf8') as file:
                 try:
                     old_data = json.load(file)

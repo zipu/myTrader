@@ -109,7 +109,7 @@ class Kiwoom(KiwoomAPI):
             Load Favorite list from the file favorites.json
         """
         data = {}
-        flist = list(util.load('favorite'))
+        flist = util.load('private')['favorites']
         for code in flist:
             codeinfo = self.GetGlobalFutOpCodeInfoByCode(code)
             if not codeinfo:
@@ -117,14 +117,14 @@ class Kiwoom(KiwoomAPI):
                 flist.remove(code)
                 self.addToFav(flist)
                 continue
-                
+
             name = re.sub(r'\(.*\).*$', '', codeinfo[18:58]).strip()
             month = codeinfo[150:158].strip()
             month = month[2:4]+'/'+month[4:6]+'/'+month[6:8]
             isActive = True if codeinfo[-1] == '1' else False
             isRecent = True if codeinfo[-2] == '1' else False
             data[code] = {"name":name, "month":month, "isActive":isActive, "isRecent":isRecent}
-        
+
         return data
 
     @pyqtSlot(QVariant)
@@ -133,7 +133,9 @@ class Kiwoom(KiwoomAPI):
             관심종목 등록 
             codes: string[]
         """
-        util.toFile('favorite', codes)
+        data = util.load('private')
+        data['favorites'] = codes
+        util.toFile('private', data)
 
 
     # !!!!!!!  더이상 사용하지 않음 !!!!!!! #

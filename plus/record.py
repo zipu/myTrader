@@ -13,29 +13,37 @@ class Record(QObject):
         super().__init__()
         self.logger = logging.getLogger(__name__)
         self.con = lite.connect("./data/record.db")
+        self.deposit = self.getBalance()['deposit']    
 
-    
+
     ######################################################################
     #    Overview 화면용 Methods                                          #
     ######################################################################
+    """
+        record.db에 저장된 매매기록으로부터 매매 통계를 작성한다
+
+    """
     @pyqtSlot(result=QVariant)
     def getAllData(self):
-        """ 통계용 데이터를 DB에서 부름 """
+
         with self.con:
             cur = self.con.cursor()
             items = "entryDate, profit, profitHigh, profitLow, \
                      ticks, ticksHigh, ticksLow, commission"
             cur.execute("SELECT {0} FROM Records".format(items))
             rows = cur.fetchall()
+
         #raw data용 pandas DataFrame 생성
-        cols = ['date', 'profit', 'profitHigh', 'profitLow', 'ticks', 'ticksHigh', 'ticksLow', 'commission']
+        cols = ['date', 'profit', 'profitHigh', 'profitLow', 'ticks', 'ticksHigh',
+                'ticksLow', 'commission']
         rawData = pd.DataFrame(rows, columns=cols)
-        
+
         #가공된 data용 Data frame
-        cols = ['date', 'profitOpen', 'profitHigh', 'profitLow', 'profitClose', 'ticksOpen', 'ticksHigh', 'ticksLow','ticksClose', 'commission']
+        cols = ['date', 'profitOpen', 'profitHigh', 'profitLow', 'profitClose', 
+                'ticksOpen', 'ticksHigh', 'ticksLow','ticksClose', 'commission']
         data = pd.DataFrame(columns=cols)
         data.date = pd.to_datetime(rawData.date)
-        
+
         #profit OHLC
         data.profitClose = rawData.profit.cumsum()
         data.profitOpen = data.profitClose.shift(1)
@@ -95,7 +103,9 @@ class Record(QObject):
         
         return dataDict
 
-        
+    def getBalance(self):
+        return util.load("private")['balance']
+
 
     ######################################################################
     #    Records 화면용 Methods                                          #

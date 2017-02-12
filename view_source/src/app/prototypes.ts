@@ -93,6 +93,7 @@ export class RecordInfo {
   public notation: number;
 }
 
+//deprecated...
 export class Statement {
   public product: string; //상품명
   public contracts: number; //계약수
