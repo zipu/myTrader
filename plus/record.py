@@ -31,7 +31,7 @@ class Record(QObject):
         #    items = "entryDate, profit, ticks, commission"
         #    cur.execute("SELECT {0} FROM Records".format(items))
         #    rows = cur.fetchall()
-
+        #
         items = "entryDate, profit, ticks, commission"
         rawData = pd.read_sql_query("SELECT {0} FROM Records".format(items), self.con)
         deposit = util.load("private")['deposit']
