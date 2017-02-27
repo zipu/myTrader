@@ -102,7 +102,7 @@ export class MarketComponent{
     //이벤트 핸들러
     //수신받은 이벤트명과 동일한 이름의 메소드에 수신받은 데이터를 전달
     this.kiwoomService.kiwoom.bridge.connect((event:string, data:any) => {
-       console.info('< ' + event + ' > received from the server...');
+       this.commonService.logging("Event received", event);
        this[event](data);
     });   
   }
@@ -324,9 +324,7 @@ export class MarketComponent{
   }
   
   onReceiveMsg(msg:any) {
-    console.info("message: "+ msg.msg + " (rqName:" + msg.rqName + ", trCode: " 
-                        + msg.scrNo + ", trCode: " + msg.trCode + ")");
+    this.commonService.logging("Received Msg", msg);
   }
-
 }
 

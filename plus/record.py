@@ -26,20 +26,9 @@ class Record(QObject):
     @pyqtSlot(result=QVariant)
     def getAllData(self):
 
-        #with self.con:
-        #    cur = self.con.cursor()
-        #    items = "entryDate, profit, ticks, commission"
-        #    cur.execute("SELECT {0} FROM Records".format(items))
-        #    rows = cur.fetchall()
-        #
         items = "entryDate, profit, ticks, commission"
         rawData = pd.read_sql_query("SELECT {0} FROM Records".format(items), self.con)
         deposit = util.load("private")['deposit']
-
-        #raw data용 pandas DataFrame 생성
-        #cols = ['date', 'profit', 'profitHigh', 'profitLow', 'ticks', 'ticksHigh',
-        #        'ticksLow', 'commission']
-        #rawData = pd.DataFrame(rows, columns=cols)
 
         #가공된 data용 Data frame
         cols = ['date', 'profitOpen', 'profitHigh', 'profitLow', 'profitClose',
@@ -72,15 +61,13 @@ class Record(QObject):
 
         #normalized data
         data['profit_norm'] = (data.profitClose-data.profitClose.min())/(data.profitClose.max()-data.profitClose.min())*100
-        #data['profit_norm'] = data.profit_norm.map(lambda x: round(x,2))
         data['ticks_norm'] =(data.ticksClose-data.ticksClose.min())/(data.ticksClose.max()-data.ticksClose.min())*100
-        #data['ticks_norm'] = data.ticks_norm.map(lambda x: round(x,2))
+
         #result (win:1, lose:0)
         data['result'] = np.where(rawData.ticks > 0, 1, 0)
 
         #cumulative winrate
         data['winrate'] = (data.result.cumsum()/(data.index+1))*100
-        #data['winrate'] = data.winrate.map(lambda x: round(x,2))
 
         #frequncy data
         freqTable = pd.DataFrame()
@@ -90,7 +77,6 @@ class Record(QObject):
         freqTable['ticks_rng'] = ticks_rng[:-1]+2.5
         freqTable['ticks_freq'] = rawData.ticks.groupby(pd.cut(rawData.ticks, ticks_rng)).count().values
         freqTable['ticks_freqP'] = (freqTable['ticks_freq']/freqTable['ticks_freq'].sum())*100
-        #freqTable['ticks_freqP'] = freqTable.ticks_freqP.map(lambda x: round(x,2))
 
         #web에 전달할 dictionary object 생성
         dataDict = {}
@@ -143,25 +129,6 @@ class Record(QObject):
         if ('priceClose' in newRecord) and newRecord['priceClose']:
             (newRecord['ticks'], newRecord['profit']) \
              = self.calcDiff(productInfo, newRecord['position'], newRecord['contracts'], newRecord['priceOpen'], newRecord['priceClose'])
-            #if ('priceHigh' not in newRecord) or (not newRecord['priceHigh']):
-            #    newRecord['priceHigh'] = newRecord['priceOpen'] if newRecord['priceOpen'] > newRecord['priceClose'] else newRecord['priceClose']
-            #if ('priceLow' not in newRecord) or (not newRecord['priceLow']):
-            #    newRecord['priceLow'] = newRecord['priceClose'] if newRecord['priceOpen'] > newRecord['priceClose'] else newRecord['priceOpen']
-            #(ticksHigh, profitHigh) \
-            #       = self.calcDiff(productInfo, newRecord['position'], newRecord['contracts'], newRecord['priceOpen'], newRecord['priceHigh'])
-            #(ticksLow, profitLow) \
-            #       = self.calcDiff(productInfo, newRecord['position'], newRecord['contracts'], newRecord['priceOpen'], newRecord['priceLow'])
-
-            #if newRecord['position'] == 'Long':
-            #    newRecord['ticksHigh'] = ticksHigh
-            #    newRecord['profitHigh'] = profitHigh
-            #    newRecord['ticksLow'] = ticksLow
-            #    newRecord['profitLow'] = profitLow
-            #else:
-            #    newRecord['ticksHigh'] = ticksLow
-            #    newRecord['profitHigh'] = profitLow
-            #    newRecord['ticksLow'] = ticksHigh
-            #    newRecord['profitLow'] = profitHigh
 
         if ('strategy' in newRecord) and newRecord['strategy']:
             newRecord['strategy'] = newRecord['strategy'].lower()

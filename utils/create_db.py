@@ -1,28 +1,6 @@
-import sqlite3 as lite
-import sys
+import tables as tb
 
-con = lite.connect('./data/history.db')
+FILTERS = tb.Filters(complib='blosc', complevel=9)
+h5file = tb.open_file("../data/market.hdf5", mode="a", title="Market Data Collection",
+                      filters=FILTERS)
 
-with con:
-    cur = con.cursor()
-    cur.execute("CREATE TABLE Statements(\
-        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,\
-        date_in TEXT NOT NULL,\
-        date_out TEXT,\
-        product  TEXT NOT NULL,\
-        contracts INGETER NOT NULL,\
-        position TEXT NOT NULL,\
-        tick_diff TEXT,\
-        emotion TEXT,\
-        weather TEXT,\
-        plan TEXT,\
-        reason_in TEXT,\
-        reason_out TEXT,\
-        imgurls TEXT,\
-        discussion TEXT,\
-        isPlanned INTEGER,\
-        orderType TEXT,\
-        slippage INTEGER,\
-        result TEXT,\
-        type TEXT)")
-    

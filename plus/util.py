@@ -1,18 +1,9 @@
 import os, json, re
-from .kiwoomAPI import KiwoomAPI
 
 class util(object):
     """
        Offers useful utility functions
     """
-
-    @staticmethod
-    def parseErrorCode(errCode):
-        errCode = str(errCode)
-        if errCode in KiwoomAPI.ERROR_MESSAGES:
-            return KiwoomAPI.ERROR_MESSAGES[errCode] + " (ErrCode:%s)" % errCode
-        else:
-            return "ErrCode: %s" % errCode
 
     @staticmethod
     def toList(str):

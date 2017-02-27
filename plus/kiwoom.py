@@ -39,7 +39,7 @@ class Kiwoom(KiwoomAPI):
         if state == 0:
             return {'succeed' : True}
         else:
-            self.logger.warning("<Send request> %s",util.parseErrorCode(state))
+            self.logger.warning("<Send request> %s", self.parseErrorCode(state))
             return {'succeed' : False}
 
     @pyqtSlot(result=QVariant)
@@ -56,22 +56,22 @@ class Kiwoom(KiwoomAPI):
         self.DisconnectRealData(scrNo)
 
 
-    def sendRequest(self, rqName, trCode, scrNo, inputValue, preNext=""):
-        """
-        Action: Send Rquest to the server
-        Args:
-            rQname (str) : request name  ex) "기본정보"
-            trCode (str) : trcode ex) "opt10001"
-            scrNo (str) : Four digit string number  ex) "0001"
-            inputValue (dict) : input values ex) "{ "종목코드": "6AM16"}"
-            preNext (str) : code for continuous request ( default= "" )
-        """
-        for key, val in inputValue.items():
-            self.SetInputValue(key, val)
-        ret = self.CommRqData(rqName, trCode, preNext, scrNo)
-        if str(ret) in KiwoomAPI.ERROR_MESSAGES:
-            self.logger.info("Send request - %s, %s, %s, %s",util.parseErrorCode(ret),\
-                              rqName, trCode, scrNo)
+    #def sendRequest(self, rqName, trCode, scrNo, inputValue, preNext=""):
+    #    """
+    #    Action: Send Rquest to the server
+    #    Args:
+    #        rQname (str) : request name  ex) "기본정보"
+    #        trCode (str) : trcode ex) "opt10001"
+    #        scrNo (str) : Four digit string number  ex) "0001"
+    #        inputValue (dict) : input values ex) "{ "종목코드": "6AM16"}"
+    #        preNext (str) : code for continuous request ( default= "" )
+    #    """
+    #    for key, val in inputValue.items():
+    #        self.SetInputValue(key, val)
+    #    ret = self.CommRqData(rqName, trCode, preNext, scrNo)
+    #    if str(ret) in KiwoomAPI.ERROR_MESSAGES:
+    #        self.logger.info("Send request - %s, %s, %s, %s", self.parseErrorCode(ret),\
+    #                          rqName, trCode, scrNo)
 
     ######################################################################
     ##                                                                  ##
@@ -295,7 +295,7 @@ class Kiwoom(KiwoomAPI):
     #errCode: 0 - 로그인 성공, 음수 - 로그인 실패
     @KiwoomAPI.on('OnEventConnect')
     def _connect(self, errCode):
-        self.logger.info('로그인 - ' + util.parseErrorCode(errCode))
+        self.logger.info('로그인 - ' + self.parseErrorCode(errCode))
         self.loginEvent.emit(errCode)
 
     @KiwoomAPI.on('OnReceiveMsg')

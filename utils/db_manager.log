@@ -1,0 +1,148 @@
+INFO:root:====================================================
+INFO:root:  2017-02-27 23:43:49.472792
+INFO:root:====================================================
+INFO:DB Manager:product: Heating Oil
+INFO:DB Manager:last recorded date: 1970-01-01 00:00:00
+INFO:root:====================================================
+INFO:root:  2017-02-27 23:44:37.642705
+INFO:root:====================================================
+INFO:root:====================================================
+INFO:root:  2017-02-27 23:44:54.575620
+INFO:root:====================================================
+INFO:DB Manager:product: Feeder Cattle
+INFO:DB Manager:last recorded date: 1970-01-01 00:00:00
+WARNING:DB Manager:minimum date: 20160116040400
+INFO:DB Manager:product: Live Cattle
+INFO:DB Manager:last recorded date: 1970-01-01 00:00:00
+WARNING:DB Manager:minimum date: 20160116040100
+INFO:DB Manager:product: Rough Rice
+INFO:DB Manager:last recorded date: 1970-01-01 00:00:00
+WARNING:DB Manager:minimum date: 20160116040000
+INFO:DB Manager:product: Lean Hogs
+INFO:DB Manager:last recorded date: 1970-01-01 00:00:00
+====================================================
+  2017-02-28 00:00:12.147673
+====================================================
+root: 
+root: 
+root: 
+DB Manager: 
+DB Manager: 
+root: ====================================================
+root:   2017-02-28 00:02:13.636034
+root: ====================================================
+DB Manager: product: Gold
+DB Manager: last recorded date: 1970-01-01 00:00:00
+root: ====================================================
+root:   2017-02-28 00:04:59.470669
+root: ====================================================
+DB Manager: product: Brent Crude Oil
+DB Manager: last recorded date: 1970-01-01 00:00:00
+root: ====================================================
+root:   2017-02-28 00:14:08.957619
+root: ====================================================
+DB Manager: product: Oats
+DB Manager: last recorded date: 1970-01-01 00:00:00
+DB Manager: reached last date at  2016-01-16T04:08:00
+DB Manager: product: Feeder Cattle
+DB Manager: last recorded date: 1970-01-01 00:00:00
+DB Manager: reached last date at  2016-01-16T04:04:00
+DB Manager: product: Wheat
+DB Manager: last recorded date: 1970-01-01 00:00:00
+DB Manager: reached last date at  2016-01-16T04:00:00
+DB Manager: product: Corn
+DB Manager: last recorded date: 1970-01-01 00:00:00
+DB Manager: reached last date at  2016-01-16T04:00:00
+DB Manager: product: Soybean Meal
+DB Manager: last recorded date: 1970-01-01 00:00:00
+root: ====================================================
+root:   2017-02-28 00:25:49.406529
+root: ====================================================
+DB Manager: product: Soybean Oil
+DB Manager: last recorded date: 1970-01-01 00:00:00
+DB Manager: preNext:  
+DB Manager: reached last date at  2016-01-16T04:00:00
+DB Manager: product: Feeder Cattle
+DB Manager: last recorded date: 1970-01-01 00:00:00
+root: ====================================================
+root:   2017-02-28 00:29:14.266543
+root: ====================================================
+DB Manager: product: British Pound
+DB Manager: last recorded date: 1970-01-01 00:00:00
+DB Manager: preNext:  
+DB Manager: reached last date at  2010-01-30T04:00:00
+DB Manager: product: Mexican pesos
+DB Manager: last recorded date: 1970-01-01 00:00:00
+root: ====================================================
+root:   2017-02-28 00:32:41.089394
+root: ====================================================
+DB Manager: product: Heating Oil
+DB Manager: last recorded date: 1970-01-01 00:00:00
+root: ====================================================
+root:   2017-02-28 00:33:17.402189
+root: ====================================================
+DB Manager: product: 10 Yr US T-Note
+DB Manager: last recorded date: 1970-01-01 00:00:00
+DB Manager: preNext:  
+DB Manager: reached last date at  2016-01-16T04:00:00
+DB Manager: product: 30 Yr US T-Bond
+DB Manager: last recorded date: 1970-01-01 00:00:00
+DB Manager: preNext:  
+DB Manager: reached last date at  2016-01-16T04:00:00
+DB Manager: product: 2 Yr U.S. T-Note
+DB Manager: last recorded date: 1970-01-01 00:00:00
+DB Manager: preNext:  
+DB Manager: reached last date at  2016-01-16T04:00:00
+DB Manager: product: 5 Yr U.S. T-Note
+DB Manager: last recorded date: 1970-01-01 00:00:00
+DB Manager: preNext:  
+DB Manager: reached last date at  2016-01-16T04:00:00
+DB Manager: product: Eurodollar
+DB Manager: last recorded date: 1970-01-01 00:00:00
+DB Manager: preNext:  
+DB Manager: reached last date at  2016-01-16T04:00:00
+DB Manager: product: Gasoline
+DB Manager: last recorded date: 1970-01-01 00:00:00
+root: ====================================================
+root:   2017-02-28 00:33:39.990968
+root: ====================================================
+DB Manager: product: Gasoline
+DB Manager: last recorded date: 1970-01-01 00:00:00
+root: ====================================================
+root:   2017-02-28 00:34:19.890340
+root: ====================================================
+root: ====================================================
+root:   2017-02-28 00:34:34.483963
+root: ====================================================
+DB Manager: product: Brent Crude Oil
+DB Manager: last recorded date: 1970-01-01 00:00:00
+root: ====================================================
+root:   2017-02-28 00:36:20.210755
+root: ====================================================
+DB Manager: product: Silver
+DB Manager: last recorded date: 1970-01-01 00:00:00
+DB Manager: preNext:  
+DB Manager: reached last date at  2016-01-16T05:40:00
+DB Manager: product: Gold
+DB Manager: last recorded date: 1970-01-01 00:00:00
+DB Manager: preNext:  
+DB Manager: reached last date at  2016-01-16T05:40:00
+DB Manager: product: Palladium
+DB Manager: last recorded date: 1970-01-01 00:00:00
+DB Manager: preNext:  
+DB Manager: reached last date at  2016-01-16T05:40:00
+DB Manager: product: Copper
+DB Manager: last recorded date: 1970-01-01 00:00:00
+DB Manager: preNext:  
+DB Manager: reached last date at  2016-01-16T05:40:00
+DB Manager: product: Platinum
+DB Manager: last recorded date: 1970-01-01 00:00:00
+DB Manager: preNext:  
+DB Manager: reached last date at  2016-01-16T05:40:00
+DB Manager: product: Gasoline
+DB Manager: last recorded date: 2017-02-28 00:40:00
+DB Manager: Last date in DB matched at 2017-02-28 00:40:00
+DB Manager: preNext: F0RB000  20161227212000                                                         
+DB Manager: reached last date at  2017-02-28T00:40:00
+DB Manager: product: Natural Gas
+DB Manager: last recorded date: 1970-01-01 00:00:00
