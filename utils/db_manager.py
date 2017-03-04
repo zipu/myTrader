@@ -3,6 +3,7 @@ import sys
 import logging
 import re
 import time
+import traceback
 from datetime import datetime, timedelta
 import tables as tb
 import numpy as np
@@ -16,7 +17,7 @@ sys.path.append('..')
 
 from plus.kiwoomAPI import KiwoomAPI
 from plus.util import util
-from db_structure import Distribution, OHLC
+from db_structure import Distribution, OHLC, Date
 
 
 class Manager(KiwoomAPI):
@@ -42,7 +43,7 @@ class Manager(KiwoomAPI):
 
         for typ, code in self.marketinfo.items():
             for code, item in code.items():
-                self.codelist.append((typ, item['groupname'], item['name'], item['code'], item['tick_unit']))
+                self.codelist.append((typ, code, item['name'], item['code'], item['tick_unit']))
         self.codelength = len(self.codelist)
 
     def updateMarketInfo(self):
@@ -64,19 +65,21 @@ class Manager(KiwoomAPI):
                 if ('Mini' in name) or ('Micro' in name) or ('Miny' in name):
                     continue
                 else:
-                    self.marketinfo[typ][item] = dict()
+                    product = typ+item
+                    self.marketinfo[typ][product] = dict()
                     itemcode = item+'000'
                     tick_unit = iteminfo[64:79].strip()
                     tick_value = iteminfo[79:94].strip()
-                    self.marketinfo[typ][item]['name'] = name
-                    self.marketinfo[typ][item]['code'] = itemcode
-                    self.marketinfo[typ][item]['tick_unit'] = float(tick_unit)
-                    self.marketinfo[typ][item]['tick_value'] = float(tick_value)
-                    self.marketinfo[typ][item]['groupname'] = typ+item
+                    self.marketinfo[typ][product]['name'] = name
+                    self.marketinfo[typ][product]['code'] = itemcode
+                    self.marketinfo[typ][product]['tick_unit'] = float(tick_unit)
+                    self.marketinfo[typ][product]['tick_value'] = float(tick_value)
+                    #self.marketinfo[typ][item]['groupname'] = typ+item
 
         self.h5file.root._v_attrs.marketinfo = self.marketinfo
-        self.h5file.flush()
-        self.logger.info("종목 정보 업데이트 완료")
+        self.h5file.close()
+        self.logger.info("market information successfully updated")
+        sys.exit()
 
     def create_db(self):
         """
@@ -88,18 +91,18 @@ class Manager(KiwoomAPI):
                         - gradient Vector
         """
         self.marketinfo = self.h5file.root._v_attrs.marketinfo
-        for i in self.h5file.iter_nodes('/'):
-            self.h5file.remove_node(i, recursive=True)
-        self.logger.info("All file nodes were cleared")
+        #self.h5file.root.remove()
         for typ in self.marketinfo:
             market = self.h5file.create_group('/', typ, "Market")
             for item in self.marketinfo[typ]:
                 title = self.marketinfo[typ][item]['name']
-                product = self.h5file.create_group(market, typ+item, title)
+                product = self.h5file.create_group(market, item, title)
                 self.h5file.create_table(product, "OHLC", OHLC, "Daily OHLC")
                 self.h5file.create_table(product, "Distribution", Distribution, "price distribution")
+                self.h5file.create_table(product, "Date", Date, "date array for distribution")
                 self.logger.info("%s table successfully created", title)
         self.h5file.close()
+        sys.exit()
 
     #Price distribution table 만들기
     def getDistribution(self):
@@ -108,67 +111,86 @@ class Manager(KiwoomAPI):
 
         group = getattr(getattr(self.h5file.root, item[0]), item[1])
         self.dist = group.Distribution
+        self.dates = group.Date
+        self.lastdate = max(self.dates.cols.date, default=0)
         self.flag = False
-        self.lastdate = max(self.dist.cols.dates, default=0) #가장 최근 date
 
         #self.preNext = ""
         self.inputValue = {
             "종목코드" : item[3],
-            "시간단위" : "1000"
+            "시간단위" : "999"
         }
         self.sendRequest(item[2], "opc10002", "0000", self.inputValue, "")
 
         #logging
-        self.logger.info("product: %s", item[2])
+        self.logger.info("*********************product: %s***********************", item[2])
         self.logger.info("last recorded date: %s", np.array(self.lastdate).astype('M8[s]'))
-        #self.logger.info("codelist: %s",self.codelist)
 
     @KiwoomAPI.on("OnReceiveTrData", screen="0000")
     def __receiveMinute(self, scrNo, rqName, trCode, fieldName, preNext):
         data = self.GetCommFullData(trCode, rqName, 2)
         datalist = [data[i:i+140] for i in range(0, len(data), 140)]
-        keys = 'Date, High, Low, Volume'
-        items = []
 
         #tick_unit = self.marketinfo[]
         for row in datalist:
-            Date = row[40:60].strip() #시간
-            High = float(row[80:100].strip()) #고가
-            Low = float(row[100:120].strip()) #저가
-            Volume = int(row[20:40].strip()) #거래량
-            Date = np.datetime64(datetime.strptime(Date, '%Y%m%d%H%M%S')).astype('uint64')/1000000
+            date = row[40:60].strip() #시간
+            idx = len(self.dates.cols.date) ##date에 mapping될 row index
+            items = []
+            dates = []
 
-            if Date == self.lastdate:
-                self.flag = True
-                date = np.array(Date).astype('M8[s]')
-                self.logger.info("Last date in DB matched at %s", date)
-                break
-
-            if High == Low:
-                item = (Date, Low, Volume)
-                items.append(item)
-
+            try:
+                date = np.datetime64(datetime.strptime(date, '%Y%m%d%H%M%S')).astype('uint64')/1000000
+            except:
+                self.logger.warning("%s has a missing DATE or something is wrong", rqName)
+                self.logger.error(traceback.format_exc())
+                continue
             else:
-                length = (High-Low)/self.tickunit +1
-                value = Volume/length
-                for pr in np.arange(Low, High, self.tickunit):
-                    item = (Date, pr, value)
-                    items.append(item)
+                high = float(row[80:100].strip()) #고가
+                low = float(row[100:120].strip()) #저가
+                volume = int(row[20:40].strip()) #거래량
 
-        if items:
-            self.dist.append(items)
-            self.dist.flush()
+                if not int(volume): #거래량이 0이면 버림
+                    self.logger.warning("%s with volume %s will be passed at %s", rqName, volume, date.astype('M8[s]'))
+                    continue
 
-        print("reciveing: %s, %s, remained=(%s/%s)"%(rqName, preNext.strip(),len(self.codelist),self.codelength))
+                elif np.rint(date) <= np.rint(self.lastdate): #최신 날짜와 겹치면 버림
+                    self.flag = True
+                    self.logger.warning("Last date in DB matched at %s", np.array(date).astype('M8[s]'))
+                    break
+
+                else:
+                    self.dates.row['date'] = date
+                    self.dates.row['index'] = idx
+
+                    if high == low:
+                        item = (idx, low, volume)
+                        items.append(item)
+
+                    else:
+                        length = (high-low)/self.tickunit +1
+                        value = volume/length
+                        for pr in np.arange(low, high, self.tickunit):
+                            item = (idx, pr, value)
+                            items.append(item)
+
+                    self.dates.row.append()
+                    self.dist.append(items)
+                    self.dates.flush()
+                    self.dist.flush()
+
+        print("reciveing: %s, %s, remained=(%s/%s)"%(rqName, preNext.strip(),
+                                                     len(self.codelist), self.codelength))
 
         if (not preNext.strip()) or self.flag:
+            self.logger.info("preNext: %s, rqName: %s, code: %s", preNext, rqName, self.inputValue["종목코드"])
+            self.logger.info("reached last date at  %s", np.array(date).astype('M8[s]'))
+
             if self.codelist:
-                self.logger.info("preNext: %s",preNext)
-                self.logger.info("reached last date at  %s", Date.astype('M8[s]'))
                 time.sleep(0.25)
                 self.getDistribution()
             else:
                 self.logger.info("All Minute Data has been successfully updated!!")
+                self.h5file.close()
                 sys.exit()
 
         else:
@@ -178,16 +200,14 @@ class Manager(KiwoomAPI):
 
     #일봉 데이터 받기
     def getOHLC(self):
-        #print(self.codelist)
-
         item = self.codelist.pop()
         group = getattr(getattr(self.h5file.root, item[0]), item[1])
 
         startday = self.today - timedelta(days=1)
-        startday = self.today.strftime('%Y%m%d')
+        startday = startday.strftime('%Y%m%d')
 
         self.ohlc = group.OHLC
-        self.lastdate = max(self.ohlc.cols.date, default=0) #가장 최근 date
+        self.lastdate = max(self.ohlc.cols.date, default=0) #중복 날짜 카운트
         self.flag = False #true이면 데이터 받는거 멈추기
 
         self.inputValue = {
@@ -197,8 +217,9 @@ class Manager(KiwoomAPI):
         self.sendRequest(item[2], "opc10003", "9999", self.inputValue, "")
 
         #logging
-        self.logger.warning("product: %s", item[2])
-        self.logger.warning("last recorded date: %s", np.array(self.lastdate).astype('M8[s]'))
+        self.logger.info("product: %s", item[2])
+        self.logger.info("last recorded date: %s", np.array(self.lastdate).astype('M8[s]'))
+        self.logger.info("start date: %s", startday)
 
     @KiwoomAPI.on("OnReceiveTrData", screen="9999")
     def __receiveDaily(self, scrNo, rqName, trCode, fieldName, preNext):
@@ -206,35 +227,53 @@ class Manager(KiwoomAPI):
         datalist = [data[i:i+140] for i in range(0, len(data), 140)]
         keys = 'Date, Open, High, Low, Close, Volume'
         items = []
-        for row in datalist:
-            Date = row[80:100].strip() #시간
-            Open = row[20:40].strip() #시가
-            High = row[40:60].strip() #고가
-            Low = row[60:80].strip() #저가
-            Close = row[0:20].strip() #종가
-            Volume = row[100:120].strip() #거래량
 
-            Date = np.datetime64(datetime.strptime(Date, '%Y%m%d')).astype('uint64')/1000000
-            if Date == self.lastdate:
-                self.flag = True
-                date = np.array(Date).astype('M8[s]')
-                self.logger.info("Last date in DB matched at %s", date)
-                break
-            item = (Date, Open, High, Low, Close, Volume)
-            items.append(item)
+        for row in datalist:
+            date = row[80:100].strip() #시간
+
+            try:
+                date = np.datetime64(datetime.strptime(date, '%Y%m%d')).astype('uint64')/1000000
+            except:
+                self.logger.warning("%s has a missing DATE or something is wrong", rqName)
+                self.logger.error(traceback.format_exc())
+                continue
+            else:
+                open = row[20:40].strip() #시가
+                high = row[40:60].strip() #고가
+                low = row[60:80].strip() #저가
+                close = row[0:20].strip() #종가
+                volume = row[100:120].strip() #거래량
+
+                if not int(volume):
+                    #거래량이 0이면 버림
+                    self.logger.warning("%s with volume %s will be passed at %s", rqName, volume, date.astype('M8[s]'))
+                    continue
+
+                elif np.rint(date) <= np.rint(self.lastdate):
+                    self.flag = True
+                    self.logger.warning("Last date in DB matched at %s", np.array(date).astype('M8[s]'))
+                    break
+
+                else:
+                    item = (date, open, high, low, close, volume)
+                    items.append(item)
 
         if items:
             self.ohlc.append(items)
             self.ohlc.flush()
-        self.logger.info("reciveing: %s, %s", rqName, preNext)
+
+        print("reciveing: %s, %s, remained=(%s/%s)"%(rqName, preNext.strip(), len(self.codelist), self.codelength))
 
         if not preNext.strip() or self.flag:
+            self.logger.info("reached last date at %s", np.array(date).astype('M8[s]'))
+
             if self.codelist:
                 time.sleep(0.25)
                 self.getOHLC()
             else:
                 #QApplication.quit()
                 self.logger.info("All Daily OHLC Data has been successfully updated!!")
+                self.h5file.close()
                 sys.exit()
 
         else:
@@ -266,7 +305,7 @@ class Manager(KiwoomAPI):
 
 if __name__ == "__main__":
 
-    logging.basicConfig(filename="db_manager.log", format="%(name)s: %(message)s", level=logging.INFO)
+    logging.basicConfig(filename="db_manager.log", format="%(levelname)s: %(message)s", level=logging.INFO)
     logging.info('====================================================')
     logging.info('  %s', datetime.now())
     logging.info('====================================================')
@@ -276,5 +315,7 @@ if __name__ == "__main__":
     window.view = QWebEnginePage()
     kiwoom = window.view.kiwoom = Manager()
     kiwoom.CommConnect(0)
+    
+    ##주의##
     #kiwoom.create_db() #db 새로 만들기...
     sys.exit(app.exec_())

@@ -14,6 +14,13 @@
 """
 import tables as tb
 
+class Date(tb.IsDescription):
+    """
+    Distribution table에 mapping될 date table
+    """
+    date = tb.Time32Col(pos=0)
+    index = tb.UInt32Col(pos=1)
+
 class Distribution(tb.IsDescription):
     """
     kind of volume distribution
@@ -22,9 +29,9 @@ class Distribution(tb.IsDescription):
         - value : 거래량 / (고가 - 저가)
         - price : 각 value의 column index
     """
-    dates = tb.Time32Col(pos=0)
+    row = tb.UInt64Col(pos=0)
     price = tb.Float64Col(pos=1)
-    value = tb.UInt16Col(pos=2)
+    value = tb.Float16Col(pos=2)
 
 class OHLC(tb.IsDescription):
     """
