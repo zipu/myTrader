@@ -169,9 +169,9 @@ class Record(QObject):
         last = Decimal(last)
 
         diff = (last - first)* sign
-        ticks = int(diff / unit)
+        ticks = diff / unit
         profit = float((ticks * value - commission)*contracts)
-        return (ticks, profit)
+        return (float(ticks), profit)
     
     @pyqtSlot(int, result=QVariant)
     def getRecordsList(self, page):

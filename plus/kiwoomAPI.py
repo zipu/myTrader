@@ -3,7 +3,6 @@ import os, json, logging
 from collections import defaultdict
 from PyQt5.QtCore import QObject
 from PyQt5.QAxContainer import QAxWidget
-from .util import util
 
 
 class KiwoomAPI(QObject):

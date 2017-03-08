@@ -5,6 +5,7 @@ import re
 import time
 import traceback
 from datetime import datetime, timedelta
+from decimal import Decimal
 import tables as tb
 import numpy as np
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, QVariant
@@ -43,8 +44,13 @@ class Manager(KiwoomAPI):
 
         for typ, code in self.marketinfo.items():
             for code, item in code.items():
-                self.codelist.append((typ, code, item['name'], item['code'], item['tick_unit']))
+                self.codelist.append((typ, code, item['name'], item['code'], item['tick_unit'], item['digit']))
         self.codelength = len(self.codelist)
+        
+        getattr(self.ocx, 'OnReceiveRealData').disconnect()
+        getattr(self.ocx, 'OnReceiveChejanData').disconnect()
+        #getattr(self.ocx, 'OnEventConnect').disconnect()
+        getattr(self.ocx, 'OnReceiveMsg').disconnect()
 
     def updateMarketInfo(self):
         """
@@ -65,6 +71,7 @@ class Manager(KiwoomAPI):
                 if ('Mini' in name) or ('Micro' in name) or ('Miny' in name):
                     continue
                 else:
+                    #print(iteminfo)
                     product = typ+item
                     self.marketinfo[typ][product] = dict()
                     itemcode = item+'000'
@@ -72,6 +79,7 @@ class Manager(KiwoomAPI):
                     tick_value = iteminfo[79:94].strip()
                     self.marketinfo[typ][product]['name'] = name
                     self.marketinfo[typ][product]['code'] = itemcode
+                    self.marketinfo[typ][product]['digit'] = Decimal(tick_unit).as_tuple().exponent *(-1)
                     self.marketinfo[typ][product]['tick_unit'] = float(tick_unit)
                     self.marketinfo[typ][product]['tick_value'] = float(tick_value)
                     #self.marketinfo[typ][item]['groupname'] = typ+item
@@ -108,6 +116,7 @@ class Manager(KiwoomAPI):
     def getDistribution(self):
         item = self.codelist.pop()
         self.tickunit = item[4]
+        self.digit = item[5]
 
         group = getattr(getattr(self.h5file.root, item[0]), item[1])
         self.dist = group.Distribution
@@ -118,7 +127,7 @@ class Manager(KiwoomAPI):
         #self.preNext = ""
         self.inputValue = {
             "종목코드" : item[3],
-            "시간단위" : "999"
+            "시간단위" : "1"
         }
         self.sendRequest(item[2], "opc10002", "0000", self.inputValue, "")
 
@@ -128,10 +137,10 @@ class Manager(KiwoomAPI):
 
     @KiwoomAPI.on("OnReceiveTrData", screen="0000")
     def __receiveMinute(self, scrNo, rqName, trCode, fieldName, preNext):
+
         data = self.GetCommFullData(trCode, rqName, 2)
         datalist = [data[i:i+140] for i in range(0, len(data), 140)]
 
-        #tick_unit = self.marketinfo[]
         for row in datalist:
             date = row[40:60].strip() #시간
             idx = len(self.dates.cols.date) ##date에 mapping될 row index
@@ -162,21 +171,28 @@ class Manager(KiwoomAPI):
                     self.dates.row['date'] = date
                     self.dates.row['index'] = idx
 
-                    if high == low:
-                        item = (idx, low, volume)
+                    if round(low, self.digit) == round(high, self.digit):
+                        item = (idx, round(low, self.digit), volume)
                         items.append(item)
 
                     else:
-                        length = (high-low)/self.tickunit +1
+                        length = (high-low)/self.tickunit + 1
                         value = volume/length
-                        for pr in np.arange(low, high, self.tickunit):
+                        if np.isinf(value) or (value < 0.1):  #inf value 가 생김 가끔..
+                            self.logger.warning("wrong volume: %s, length: %s at %s", volume, length, np.array(date).astype('M8[s]'))
+                            continue
+                        for pr in np.arange(round(low, self.digit), high - self.tickunit/2, self.tickunit):
                             item = (idx, pr, value)
                             items.append(item)
 
-                    self.dates.row.append()
-                    self.dist.append(items)
-                    self.dates.flush()
-                    self.dist.flush()
+                    try:
+                        self.dates.row.append()
+                        self.dist.append(items)
+                    except: 
+                        print(items)
+                    else:
+                        self.dates.flush()
+                        self.dist.flush()
 
         print("reciveing: %s, %s, remained=(%s/%s)"%(rqName, preNext.strip(),
                                                      len(self.codelist), self.codelength))
@@ -196,6 +212,8 @@ class Manager(KiwoomAPI):
         else:
             time.sleep(0.25)
             self.sendRequest(rqName, trCode, scrNo, self.inputValue, preNext)
+
+
 
 
     #일봉 데이터 받기
@@ -291,10 +309,10 @@ class Manager(KiwoomAPI):
             #self.updateMarketInfo()
             
             #일봉 데이터 받기
-            #self.getOHLC()
+            self.getOHLC()
 
             #분봉 데이터 받기
-            self.getDistribution()
+            #self.getDistribution()
                     
 
         #db 만들기
