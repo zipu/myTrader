@@ -50,3 +50,29 @@ class OHLC(tb.IsDescription):
     low = tb.Float32Col(pos=3)
     close = tb.Float32Col(pos=4)
     volume = tb.UInt32Col(pos=5)
+
+def create_db(self):
+    """
+     market info로부터 계층적 DB 구조 자동생성
+     시장구분 - 종목 - OHLC Table
+                    - distribution Table
+                    - dates Table
+                    - density Vector
+                    - gradient Vector
+    """
+    #open DB
+    filters = tb.Filters(complib='blosc', complevel=9)
+    h5file = tb.open_file("../data/market.hdf5", mode="a",
+                                   title="Market Data Collection", filters=filters)
+
+    #create db
+    marketinfo = h5file.root._v_attrs.marketinfo
+    for typ in marketinfo:
+        market = h5file.create_group('/', typ, "Market")
+        for item in marketinfo[typ]:
+            title = marketinfo[typ][item]['name']
+            product = h5file.create_group(market, item, title)
+            h5file.create_table(product, "OHLC", OHLC, "Daily OHLC")
+            h5file.create_table(product, "Distribution", Distribution, "price distribution")
+            h5file.create_table(product, "Date", Date, "date array for distribution")
+    h5file.close()

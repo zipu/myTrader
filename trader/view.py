@@ -12,6 +12,8 @@ from .record import Record
 class MainView(QWebEngineView):
     def __init__(self):
         super().__init__()
+        self.logger = logging.getLogger(__name__)
+
         #initialize utilities
         self._initShortcuts()
         self._debuggingMode()
@@ -23,7 +25,7 @@ class MainView(QWebEngineView):
         #for i in range(16):
         #    self.settings().setAttribute(i, True)
         #    print(self.settings().testAttribute(i))
-        
+
         webchannel = QWebChannel(self.page())
         self.page().setWebChannel(webchannel)
 

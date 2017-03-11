@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import sys
-import argparse
 import logging
 import re
 import time
@@ -11,19 +10,17 @@ import tables as tb
 import numpy as np
 from PyQt5.QtWidgets import QApplication
 
-
 sys.path.append('..')
+from trader.kiwoomAPI import KiwoomAPI
+from trader.util import util
 
 
-from plus.kiwoomAPI import KiwoomAPI
-from plus.util import util
-from db_structure import Distribution, OHLC, Date
-
-
-class Manager(KiwoomAPI):
+class Update(KiwoomAPI):
 
     def __init__(self, arg=None):
         super().__init__()
+        import os
+        print(os.getcwd())
         self.logger = logging.getLogger('DB Manager')
         self.arg = arg
 
@@ -86,31 +83,9 @@ class Manager(KiwoomAPI):
 
         self.h5file.root._v_attrs.marketinfo = self.marketinfo
         self.h5file.close()
-        self.logger.info("market information successfully updated")
+        print("market information successfully updated")
         sys.exit()
 
-    def create_db(self):
-        """
-         market info로부터 계층적 DB 구조 자동생성
-         시장구분 - 종목 - OHLC Table
-                        - distribution Table
-                        - dates Table
-                        - density Vector
-                        - gradient Vector
-        """
-        self.marketinfo = self.h5file.root._v_attrs.marketinfo
-        #self.h5file.root.remove()
-        for typ in self.marketinfo:
-            market = self.h5file.create_group('/', typ, "Market")
-            for item in self.marketinfo[typ]:
-                title = self.marketinfo[typ][item]['name']
-                product = self.h5file.create_group(market, item, title)
-                self.h5file.create_table(product, "OHLC", OHLC, "Daily OHLC")
-                self.h5file.create_table(product, "Distribution", Distribution, "price distribution")
-                self.h5file.create_table(product, "Date", Date, "date array for distribution")
-                self.logger.info("%s table successfully created", title)
-        self.h5file.close()
-        sys.exit()
 
     #Price distribution table 만들기
     def getDistribution(self):
@@ -206,7 +181,7 @@ class Manager(KiwoomAPI):
                 time.sleep(0.25)
                 self.getDistribution()
             else:
-                self.logger.info("All Minute Data has been successfully updated!!")
+                print("All Minute Data has been successfully updated!!")
                 self.h5file.close()
                 sys.exit()
 
@@ -290,16 +265,13 @@ class Manager(KiwoomAPI):
                 time.sleep(0.25)
                 self.getOHLC()
             else:
-                #QApplication.quit()
-                self.logger.info("All Daily OHLC Data has been successfully updated!!")
+                print("All Daily OHLC Data has been successfully updated!!")
                 self.h5file.close()
                 sys.exit()
 
         else:
             time.sleep(0.25)
             self.sendRequest(rqName, trCode, scrNo, self.inputValue, preNext)
-
-
 
 
     @KiwoomAPI.on('OnEventConnect')
@@ -313,23 +285,3 @@ class Manager(KiwoomAPI):
                 self.updateMarketInfo()
             else:
                 sys.exit()
-
-
-if __name__ == "__main__":
-
-    logging.basicConfig(filename="db_manager.log", format="%(levelname)s: %(message)s", level=logging.INFO)
-    logging.info('====================================================')
-    logging.info('  %s', datetime.now())
-    logging.info('====================================================')
-
-    parser = argparse.ArgumentParser(description='database manager')
-    parser.add_argument('--update', help='update data')
-    args = parser.parse_args()
-
-    app = QApplication(sys.argv)
-    kiwoom = Manager(args.update)
-    kiwoom.CommConnect(0)
-    
-    ##주의##
-    #kiwoom.create_db() #db 새로 만들기...
-    sys.exit(app.exec_())

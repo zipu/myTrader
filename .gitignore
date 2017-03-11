@@ -3,6 +3,6 @@ __pycache__/
 /view_source/node_modules/
 /view_source/typings/
 /view_source/public/js
-utils/db_manager.log
+db_manager/manager.log
 data/
 .vscode/
