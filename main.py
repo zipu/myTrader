@@ -14,7 +14,7 @@ class Window(QMainWindow):
         self._initUI()
 
         if mode == "prod":
-            filename = "view_source/dist/index.html"
+            filename = "view/dist/index.html"
             self.view.load(QUrl.fromLocalFile(os.path.join(os.path.dirname( os.path.abspath( __file__ ) ), filename)))
 
         elif mode == "dev":

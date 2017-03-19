@@ -2,9 +2,13 @@
 
 import os, json, logging, re, datetime, time
 from collections import defaultdict
+
+import tables as tb
+import numpy as np
+from PyQt5.QtCore import pyqtSlot, pyqtSignal, QVariant
+
 from .kiwoomAPI import KiwoomAPI
 from .util import util
-from PyQt5.QtCore import pyqtSlot, pyqtSignal, QVariant
 
 
 class Kiwoom(KiwoomAPI):
@@ -23,6 +27,7 @@ class Kiwoom(KiwoomAPI):
     def __init__(self):
         super().__init__()
         self.logger = logging.getLogger(__name__)
+        self.isConnected = False
 
     @pyqtSlot()
     def testbed(self):
@@ -30,8 +35,10 @@ class Kiwoom(KiwoomAPI):
 
     @pyqtSlot()
     def quit(self):
+        time.sleep(1)
         self.CommTerminate()
-        super().__init__()
+        self.isConnected = False
+        self.logger.info("키움 서버와의 연결을 종료하였습니다.")
 
     @pyqtSlot(result=QVariant)
     def login(self):
@@ -44,11 +51,12 @@ class Kiwoom(KiwoomAPI):
 
     @pyqtSlot(result=QVariant)
     def connectState(self):
-        state = self.GetConnectState()
-        if state == 1:
-            return {'succeed' : True}
-        else:
-            return {'succeed' : False}
+        return {'succeed' : self.isConnected}
+        #state = self.GetConnectState() 이 함수 문제있음..
+        #if state == 1:
+        #    return {'succeed' : True}
+        #else:
+        #    return {'succeed' : False}
 
 
     @pyqtSlot(str)
@@ -89,16 +97,17 @@ class Kiwoom(KiwoomAPI):
             allProducts[types] = dict()
             productslist = util.toList(self.GetGlobalFutureItemlistByType(types))
             for product in productslist:
-                allProducts[types][product] = dict()
+                group = types+product
+                allProducts[types][group] = dict()
                 codelist = util.toList(self.GetGlobalFutureCodelist(product))
                 for code in codelist:
-                    allProducts[types][product][code] = dict()
+                    allProducts[types][group][code] = dict()
                     codeinfo = self.GetGlobalFutOpCodeInfoByCode(code)
                     name = re.sub(r'\(.*\).*$', '', codeinfo[18:58]).strip()
                     month = codeinfo[150:158].strip()
                     isActive = True if codeinfo[-1] == '1' else False
                     isRecent = True if codeinfo[-2] == '1' else False
-                    allProducts[types][product][code] = {
+                    allProducts[types][group][code] = {
                         "name":name, "month":month, "isActive":isActive, "isRecent":isRecent
                     }
         return allProducts
@@ -121,9 +130,12 @@ class Kiwoom(KiwoomAPI):
             name = re.sub(r'\(.*\).*$', '', codeinfo[18:58]).strip()
             month = codeinfo[150:158].strip()
             month = month[2:4]+'/'+month[4:6]+'/'+month[6:8]
+            market = codeinfo[58:61].strip()
+            groupname = codeinfo[58:61].strip() + codeinfo[12:18].strip()
             isActive = True if codeinfo[-1] == '1' else False
             isRecent = True if codeinfo[-2] == '1' else False
-            data[code] = {"name":name, "month":month, "isActive":isActive, "isRecent":isRecent}
+            data[code] = {"name":name, "month":month, "groupname":groupname,
+                          "isActive":isActive, "isRecent":isRecent, "market": market}
 
         return data
 
@@ -138,8 +150,7 @@ class Kiwoom(KiwoomAPI):
         util.toFile('private', data)
 
 
-    # !!!!!!!  더이상 사용하지 않음 !!!!!!! #
-    # !!!!!!!  더이상 사용하지 않음 !!!!!!! #
+
     @pyqtSlot(str, QVariant)
     def requestProductsReal(self, scrNo, inputValue):
         """
@@ -153,8 +164,8 @@ class Kiwoom(KiwoomAPI):
         #else:
         self.sendRequest("관심종목", "opt10005", scrNo, inputValue)
 
-    # !!!!!!!  더이상 사용하지 않음 !!!!!!! #
-    # !!!!!!!  더이상 사용하지 않음 !!!!!!! #
+
+
     @KiwoomAPI.on('OnReceiveTrData', screen='0001')
     def _onTrProducts(self, scrNo, rqName, trCode, fieldName, preNext):
         """
@@ -166,8 +177,8 @@ class Kiwoom(KiwoomAPI):
             code = self.GetCommData(trCode, rqName, i, "종목코드")
             data[code].append(self.GetCommData(trCode, rqName, i, "현재가"))
             data[code].append(self.GetCommData(trCode, rqName, i, "전일대비"))
-            volumn = self.GetCommData(trCode, rqName, i, "누적거래량")
-            data[code].append(format(int(volumn), ',d'))
+            #volumn = self.GetCommData(trCode, rqName, i, "누적거래량")
+            #data[code].append(format(int(volumn), ',d'))
 
         self.bridge.emit("_onProducts", dict(data))
 
@@ -200,12 +211,13 @@ class Kiwoom(KiwoomAPI):
             openDate = self.GetCommData(trCode, rqName, 0, "영업일자")
             openDate = openDate[0:4]+'/'+openDate[4:6]+'/'+openDate[6:8]
             data = {
-                'market' : self.GetCommData(trCode, rqName, 0, "거래소"),
+                #'market' : self.GetCommData(trCode, rqName, 0, "품목구분"),
                 'currency' : self.GetCommData(trCode, rqName, 0, "결제통화"),
                 'expirate' : expirate,
                 'remained' : self.GetCommData(trCode, rqName, 0, "잔존만기"),
                 'openDate' : openDate,
-                'tickValue' : self.GetCommData(trCode, rqName, 0, "틱가치"),
+                'tickValue' : self.GetCommData(trCode, rqName, 0, "틱가치").strip(),
+                'tickUnit' : self.GetCommData(trCode, rqName, 0, "틱단위").strip(),
                 'openTime' : self.GetCommData(trCode, rqName, 0, "시작시간"),
                 'closeTime' : self.GetCommData(trCode, rqName, 0, "종료시간")
             }
@@ -244,17 +256,45 @@ class Kiwoom(KiwoomAPI):
     ##                             Chart Screen                         ##
     ##                            (Screen : 0004)                       ##
     ######################################################################
-    @pyqtSlot(str)
-    def getChartData(self, code, preNext=""):
-        self.selectedProduct = code
-        self.preNext = preNext
-        
-        today = datetime.datetime.now().strftime("%Y%m%d")
-        inputValue = {
-            "종목코드" : code,
-            "조회일자" : today
+    @pyqtSlot(str, str, result=QVariant)
+    def get_density(self, market, group):
+        """
+         db에서 density data를 로드하는 매소드
+        """
+        with tb.open_file("data/market.hdf5", mode="r") as db:
+            self.density = getattr(getattr(db.root, market), group).density.read()
+
+        data = {
+            'density' : self.density.T.tolist(),
+            'density_diff' : self.get_density_diff(5)
         }
-        self.sendRequest("ChartData", "opc10003", "0004", inputValue, preNext)
+
+        return data
+
+
+    @pyqtSlot(int, result=QVariant)
+    def get_density_diff(self, length):
+        density = self.density[1]
+        window = length*2 + 1
+        center = length + 1
+        rolled = self.rolling_window(density, window)
+        density_diff = np.apply_along_axis(self.calc_density_diff, 1, rolled, center=center)
+        density_diff = np.concatenate([np.zeros(length), density_diff, np.zeros(length)])
+        data = np.array([self.density[0], density_diff])
+        return data.T.tolist()
+
+
+
+
+    def rolling_window(self, arr, window):
+        shape = arr.shape[:-1] + (arr.shape[-1] - window + 1, window)
+        strides = arr.strides + (arr.strides[-1],)
+        return np.lib.stride_tricks.as_strided(arr, shape=shape, strides=strides)
+
+    def calc_density_diff(self, arr, center):
+        left = arr[:center].sum()
+        right = arr[center+1:].sum()
+        return np.log2(left/right)
 
 
     @KiwoomAPI.on('OnReceiveTrData', screen='0004')
@@ -296,7 +336,12 @@ class Kiwoom(KiwoomAPI):
     @KiwoomAPI.on('OnEventConnect')
     def _connect(self, errCode):
         self.logger.info('로그인 - ' + self.parseErrorCode(errCode))
-        self.loginEvent.emit(errCode)
+        self.bridge.emit('onEventConnect', errCode)
+        if errCode == 0:
+            self.isConnected = True
+        elif errCode == -106:
+            self.isConnected = False
+
 
     @KiwoomAPI.on('OnReceiveMsg')
     def _receiveMsg(self, scrNo, rqName, trCode, msg):

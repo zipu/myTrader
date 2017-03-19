@@ -57,13 +57,13 @@ class Calc():
                     density = np.squeeze(np.asarray((scale*matrix).sum(axis=0)))
                     normed_density = density/density.sum()
                     x_ticks = np.arange(price.min(), price.max()+tick/2, tick).round(digit).tolist()
-                    array = np.array([normed_density, x_ticks]).T
+                    array = np.array([x_ticks, normed_density])
 
                     #save to db
                     if hasattr(item, 'density'):
                         item.density.remove()
 
-                    self.h5file.create_array(item, 'density', array.tolist(), shape=array.shape)
+                    self.h5file.create_array(item, 'density', array, shape=array.shape)
 
         print("Density distribution successfully created")
         self.h5file.close()

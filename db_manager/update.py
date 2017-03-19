@@ -53,12 +53,10 @@ class Update(KiwoomAPI):
         """
             kiwoom API로부터 각 종목의 기본정보를 취합하여 db.root._v_attrs에 저장함
         """
-        if self.marketinfo:
-            del self.h5file.root._v_attrs.marketinfo
-        self.marketinfo = dict()
+        updatedinfo = dict()
         types = util.toList(self.GetGlobalFutureItemTypelist())
         for typ in types:
-            self.marketinfo[typ] = dict()
+            updatedinfo[typ] = dict()
             items = util.toList(self.GetGlobalFutureItemlistByType(typ))
             for item in items:
                 #self.marketinfo[typ][item] = dict() 
@@ -70,18 +68,27 @@ class Update(KiwoomAPI):
                 else:
                     #print(iteminfo)
                     product = typ+item
-                    self.marketinfo[typ][product] = dict()
+                    updatedinfo[typ][product] = dict()
                     itemcode = item+'000'
                     tick_unit = iteminfo[64:79].strip()
                     tick_value = iteminfo[79:94].strip()
-                    self.marketinfo[typ][product]['name'] = name
-                    self.marketinfo[typ][product]['code'] = itemcode
-                    self.marketinfo[typ][product]['digit'] = Decimal(tick_unit).as_tuple().exponent *(-1)
-                    self.marketinfo[typ][product]['tick_unit'] = float(tick_unit)
-                    self.marketinfo[typ][product]['tick_value'] = float(tick_value)
+                    updatedinfo[typ][product]['name'] = name
+                    updatedinfo[typ][product]['code'] = itemcode
+                    updatedinfo[typ][product]['digit'] = Decimal(tick_unit).as_tuple().exponent *(-1)
+                    updatedinfo[typ][product]['tick_unit'] = float(tick_unit)
+                    updatedinfo[typ][product]['tick_value'] = float(tick_value)
                     #self.marketinfo[typ][item]['groupname'] = typ+item
 
-        self.h5file.root._v_attrs.marketinfo = self.marketinfo
+        if self.marketinfo:
+            if self.marketinfo == updatedinfo:
+                print("Market information did NOT changed")
+            else:
+                del self.h5file.root._v_attrs.marketinfo
+                self.h5file.root._v_attrs.marketinfo = updatedinfo
+                print("Market information changed")
+        else:
+            self.h5file.root._v_attrs.marketinfo = updatedinfo
+
         self.h5file.close()
         print("market information successfully updated")
         sys.exit()

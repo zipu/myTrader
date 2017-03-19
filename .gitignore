@@ -1,8 +1,8 @@
 todo.md
 __pycache__/
-/view_source/node_modules/
-/view_source/typings/
-/view_source/public/js
+/view/node_modules/
+/view/typings/
+/view/public/js
 db_manager/manager.log
 data/
 .vscode/
