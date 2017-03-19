@@ -28,6 +28,6 @@ export class AppComponent{
     sendAlert(msg:string) {
       this.alertMsg = msg;
       this.visible = true;
-      setTimeout( () => this.visible=false ,2000 )
+      setTimeout( () => this.visible=false ,5000 )
     }
 }

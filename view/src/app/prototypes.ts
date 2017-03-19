@@ -12,36 +12,34 @@ export class Products {
 
 
 export class Product {
-  code: string;
-  name: string;
-  month: string;
-  isActive: boolean;
-  isRecent: boolean;
-  price: string;
-  diff: string;
-  volumn: string;
-  chart: any[];
-  constructor(code: string, name: string, month: string) {
+  code: string; //종목코드
+  name: string; //종목이름
+  month: string; //월물
+  isActive: boolean; //액티브 월물?
+  isRecent: boolean; //최근 월물?
+  price: string; //가격
+  diff: string; //전일대비
+  volumn: string; //거래량
+  density: any; //density 데이터
+  market: string;  //상품군
+  groupname: string; //그룹네임 ex)CUR6A
+  currency: string; //결재통화
+  margin: string; //증거금
+  expirate: string; //만기일
+  remained: string; //잔존 만기
+  openDate: string; //영업일
+  tickValue: string; //틱 가치
+  tickUnit: string; //틱 단위
+  openTime: string; //장시작시간
+  closeTime: string; //장종료시간
+  constructor(code: string, name: string, month: string, groupname:string, market:string) {
     this.code = code;
     this.name = name;
     this.month = month;
+    this.groupname = groupname;
+    this.market = market;
   }
 }
-
-
-// this will be deprecated.. 
-export class ProductInfo {
-  market: string;
-  currency: string;
-  margin: string;
-  expirate: string;
-  remained: string;
-  openDate: string;
-  tickValue: string;
-  openTime: string;
-  closeTime: string;
-}
-
 
 
 /***** RecordComponent *****/

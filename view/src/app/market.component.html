@@ -27,8 +27,8 @@
                             </th>
                             <th style='width:32%'>Product</th>
                             <th style='width:14%'>Expiration</th>
-                            <th style='width:16%'>filter1</th>
-                            <th style='width:16%'>filter2</th>
+                            <th style='width:16%'>Price</th>
+                            <th style='width:16%'>Diff</th>
                             <th style='width:16%'>filter3</th>
                         </tr>
                     </thead>
@@ -39,8 +39,8 @@
                             </td>
                             <td (click)="selectProduct(code)" style='width:32%'>{{products.list[code].name}}</td>
                             <td (click)="selectMonth(code)" style='width:14%'>{{products.list[code].month}}</td>
-                            <td style='width:16%'></td>
-                            <td style='width:16%'></td>
+                            <td style='width:16%'>{{products.list[code].price}}</td>
+                            <td style='width:16%'>{{products.list[code].diff}}</td>
                             <td style='width:16%; text-align:right; padding-right:10px;'></td>
                         </tr>
                     </tbody>
@@ -52,33 +52,33 @@
             <table class="table table-condensed table-bordered">
                 <tr>
                     <th>기초상품</th>
-                    <td style='font-size:13px;padding:0px;'>{{productInfo? products.selectedProduct : ''}}</td>
+                    <td style='font-size:13px;padding:0px;'>{{selectedProduct? selectedProduct.name : ''}}</td>
                     <th>거래소</th>
-                    <td>{{productInfo? productInfo.market : ''}}</td>
+                    <td>{{selectedProduct? selectedProduct.market : ''}}</td>
                 </tr>
                 <tr>
                     <th>기준통화</th>
-                    <td>{{productInfo? productInfo.currency : ''}}</td>
+                    <td>{{selectedProduct? selectedProduct.currency : ''}}</td>
                     <th>위탁증거금</th>
-                    <td>{{productInfo? productInfo.margin : ''}}</td>
+                    <td>{{selectedProduct? selectedProduct.margin : ''}}</td>
                 </tr>
                 <tr>
                     <th>최종거래일</th>
-                    <td>{{productInfo? productInfo.expirate : ''}}</td>
+                    <td>{{selectedProduct? selectedProduct.expirate : ''}}</td>
                     <th>영업일자</th>
-                    <td>{{productInfo? productInfo.openDate : ''}}</td>
+                    <td>{{selectedProduct? selectedProduct.openDate : ''}}</td>
                 </tr>
                 <tr>
                     <th>틱가치</th>
-                    <td>{{productInfo? productInfo.tickValue : ''}}</td>
+                    <td>{{selectedProduct? selectedProduct.tickValue : ''}}</td>
                     <th>잔존만기</th>
-                    <td>{{productInfo? productInfo.remained : ''}}</td>
+                    <td>{{selectedProduct? selectedProduct.remained : ''}}</td>
                 </tr>
                 <tr>
                     <th>장시작시간</th>
-                    <td>{{productInfo? productInfo.openTime : ''}}</td>
+                    <td>{{selectedProduct? selectedProduct.openTime : ''}}</td>
                     <th>장마감시간</th>
-                    <td>{{productInfo? productInfo.closeTime : ''}}</td>
+                    <td>{{selectedProduct? selectedProduct.closeTime : ''}}</td>
                 </tr>
             </table>
         </div>
@@ -86,7 +86,9 @@
     <div class="second row">
         <!-- 차트화면 -->
         <div class="chart col-md-7">
-            <my-chart *ngIf="selectedProduct" [product]="selectedProduct"></my-chart>
+            <!-- <chart *ngIf="selectedProduct" [product]="selectedProduct"></chart> -->
+            <my-chart [product]="selectedProduct"></my-chart>
+
         </div>
         <!-- 호가정보 화면 -->
         <div class="hoga col-md-5">

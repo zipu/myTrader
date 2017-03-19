@@ -15,12 +15,11 @@
       <ul class="nav nav-sidebar">
         <li routerLinkActive="active"><a routerLink="/overview">Overview<span class="sr-only">(current)</span></a></li>
         <li routerLinkActive="active"><a routerLink="/market">Market</a></li>
-        <li routerLinkActive="active"><a routerLink="/trading">Trading</a></li>
         <li routerLinkActive="active"><a routerLink="/record">Record</a></li>
       </ul>
     </div>
     <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-      <div class="alert alert-success" [hidden]='!visible'>
+      <div class="alert alert-success" [hidden]='!visible' style='z-index:10'>
         <strong>{{alertMsg || 'message'}}</strong>
       </div>
       <router-outlet></router-outlet>

@@ -1,3 +1,5 @@
+
+/* first row (로그인 버튼) */
 .connect{
     float: right;
     margin-right: 30px;
@@ -26,19 +28,11 @@
     text-align: center;
 }
 
-.inform {
+
+/* 관심 종목 화면 */
+.second {
     margin-top: 15px;
 }
-
-./trading-view * {
-    border-color: black;
-    border-style: solid;
-    border-width: 1px;
-}
-
-.trading-view {
-}
-
 
 /* products list */
 .products-list {
@@ -150,7 +144,7 @@
 }
 
 .chart {
-        border-style: solid;
+        //border-style: solid;
        
         height: 300px;
 }

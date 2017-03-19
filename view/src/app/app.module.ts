@@ -7,7 +7,6 @@ import { Router } from '@angular/router';
 //components
 import { AppComponent }   from './app.component';
 import { OverviewComponent }   from './overview.component';
-import { TradingComponent }   from './trading.component';
 import { ChartComponent }   from './chart.component';
 import { RecordComponent }   from './record.component';
 import { MarketComponent } from './market.component'; 
@@ -34,7 +33,6 @@ import { routing } from './app.routing';
         AppComponent,
         OverviewComponent,
         MarketComponent,
-        TradingComponent,
         ChartComponent,
         RecordComponent,
     ],

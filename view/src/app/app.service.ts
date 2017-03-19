@@ -16,11 +16,11 @@ export class KiwoomService {
         });
     }
     
-    quit() {
+    quit() { //deprecated
         this.kiwoom.quit();
     }
     
-    disconnect(scrno:string) {
+    disconnect(scrno:string) { //deprecated
         this.kiwoom.disconnect(scrno);
     }
     
@@ -28,33 +28,34 @@ export class KiwoomService {
         return this.kiwoom.connectState();
     }
     
-    getProducts():any {
+    getProducts():any { //deprecated
         return this.kiwoom.getProducts()
                 .then((data:Object) => {
                    return data;
                 });           
     }
 
-    getFavorits():any {
+    getFavorits():any { //deprecated
         return this.kiwoom.getFavList()
                 .then((data:Object) => {
                     return data;
                 });
     }
     
-    addToFav(fav:string[]) {
+    addToFav(fav:string[]) { //deprecated
         this.kiwoom.addToFav(fav);
     }
-    
-    getProductsReal(scrNo:string, inputValue:string[]) {
+
+    //관심종목의 실시간 데이터 요청
+    requestProductsReal(scrNo:string, inputValue:string[]) {
         this.kiwoom.requestProductsReal(scrNo, inputValue);
     }
     
-    getProductInfo(code:string) {
+    getProductInfo(code:string) { //deprecated
         this.kiwoom.getProductInfo(code);
     }
 
-    getChartData(code:string){
+    getChartData(code:string){ //deprecated
         this.kiwoom.getChartData(code);
     }
 }

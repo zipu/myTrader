@@ -6,7 +6,7 @@ import { KiwoomService } from './app.service';
 
 
 @Component({
-    selector: 'my-chart',
+    selector: 'chart',
     template: require('./chart.component.html')
 })
 
@@ -15,7 +15,7 @@ export class ChartComponent{
     @Input()
     product: Product;
     
-    bokeh:any;
+    //bokeh:any;
     data_doc:any;
     chartdata:any;
     
