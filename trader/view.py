@@ -8,6 +8,7 @@ from PyQt5.QtWebChannel import QWebChannel
 
 from .kiwoom import Kiwoom
 from .record import Record
+from .account import Account
 
 class MainView(QWebEngineView):
     def __init__(self):
@@ -21,6 +22,7 @@ class MainView(QWebEngineView):
         #setting up page and register kiwoom object into the javascript context
         self.kiwoom = Kiwoom()
         self.record = Record()
+        self.account = Account()
 
         #for i in range(16):
         #    self.settings().setAttribute(i, True)
@@ -31,7 +33,8 @@ class MainView(QWebEngineView):
 
         webObjects = {
             "kiwoom" : self.kiwoom,
-            "record" : self.record
+            "record" : self.record,
+            "account" : self.account
         }
         #webchannel.registerObject("kiwoom", self.history)
         webchannel.registerObjects(webObjects)

@@ -1,4 +1,4 @@
-import { Component, Input, ViewChild, ElementRef} from '@angular/core';
+import { Component, Input, ViewChild, ElementRef, SimpleChanges} from '@angular/core';
 import { Product } from './prototypes';
 import { KiwoomService } from './app.service';
 
@@ -7,13 +7,14 @@ declare var Highcharts: any;
 
 @Component({
     selector: 'my-chart',
-    template: require('./chart.component.html')
+    template: require('./chart.component.html'),
+    styles: [require('./chart.component.css')],
 })
 
 export class ChartComponent{
     
-    @Input()
-    product: Product;
+    @Input('product') product: Product;
+    @Input('kiwoom') kiwoom: any;
 
     @ViewChild('densityDiv')
     densityDiv: ElementRef;
@@ -24,11 +25,30 @@ export class ChartComponent{
     constructor(
         private kiwoomService: KiwoomService
     ) {}
-    
 
-    ngAfterViewInit(){
-        //construct chart
-        //this.drawDensityChart();
+
+    test() {
+        console.log(this.densityChart.series[0].data[100])
+        this.densityChart.series[0].data[100].select();
+        
+    }
+
+    //변수 변경하여 차트를 다시 그림
+    apply_changes() {
+        
+        //console.log(this.product.size);
+        this.kiwoom.get_density_diff(this.product.size)
+            .then( (data:any)=> {
+                this.densityChart.series[1].update({data: data});
+            });
+    }
+
+    setPriceOnChart() {
+        console.log(this.densityChart.series[0])
+        let price = Number(this.product.price);
+        let index = this.densityChart.series[0].xData.indexOf(price);
+        console.log(price, index)
+        this.densityChart.series[0].data[index].select();
     }
 
     drawDensityChart(data:any) {
@@ -41,6 +61,7 @@ export class ChartComponent{
             },
 
             xAxis: {
+                crosshair: true,
                 title: {
                     text: 'Price'
                 },
@@ -49,7 +70,7 @@ export class ChartComponent{
                     formatter: function () {
                         return this.value; // clean, unformatted number for year
                     }
-                }
+                },
             },
             yAxis: [{
                         title: {
@@ -60,22 +81,44 @@ export class ChartComponent{
                              return this.value * 100 + '%';
                             }
                         },
-                        height: '80%'
+                        height: '70%'
                     }, {
                         title: {
                           text: 'diff'
                         },
                         labels: {
                         formatter: function () {
-                             return this.value * 100 + '%';
+                             return this.value;
                             }
                         },
-                        top: '80%',
-                        height: '20%'
+                        plotLines: [{
+                            color: 'blue',
+                            width: 2,
+                            value: 0
+                        },{
+                            color: 'red',
+                            width: 2, 
+                            value: 1 
+                        },{
+                            color: 'red',
+                            width: 2, 
+                            value: -1 
+                        }],
+                        top: '70%',
+                        height: '30%',
+                        offset: 0,
+                        lineWidth: 1
                    }],
+            
+            tooltip: {
+                split: true,
+        
+            },
     
             plotOptions: {
+                
                 area: {
+                  //enableMouseTracking: false,
                   fillColor: {
                     linearGradient: {
                         x1: 0,
@@ -89,7 +132,7 @@ export class ChartComponent{
                     ]
                   },
                   marker: {
-                      radius: 2
+                      enabled: false
                   },
                   lineWidth: 1,
                   states: {
@@ -100,27 +143,21 @@ export class ChartComponent{
                   threshold: null
                 }
             },
+            legend: {
+                enabled: false
+            },
             series: [{
                   type: 'area',
-                  name: this.product.name,
+                  name: 'density',
                   data: data.density,
                   yAxis: 0,
               }, {
                   type: 'line',
-                  name: this.product.name,
+                  name: 'cumdiff-ratio',
                   data: data.density_diff,
                   yAxis: 1,
               }]
         });
-    }
-
-    
-
-    updateChart(){
-    }
-
-    test(){
-        console.log(this.product);
     }
 
 }

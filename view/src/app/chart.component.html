@@ -1,6 +1,22 @@
-
 <div class="chart-div row">
-    <button (click)='test()'>test button</button>
-    --------------------------------------------------------------------------------------------------------
-    <div #densityDiv></div>
+    <div class='density-chart col-md-9'>
+        <div #densityDiv style="height: 400px;"></div>
+    </div>
+    <div class='chart-manager col-md-3'>
+            <div class="constants">
+            <table class=" table table-condensed table-bordered">
+                <tr>
+                    <th>Size</th>
+                    <td><input class="form-control" type="number" name="size" [(ngModel)]="product.size" style="text-align: center">
+                    </td>
+                </tr>
+                <tr>
+                    <th>title2</th>
+                    <td><button (click)="test()">test</button></td>
+                </tr>
+            </table>
+            </div>
+        <button type="button" class="apply-btn btn btn-default btn-sm" (click)="apply_changes()">Apply</button>
+    </div>
+
 </div>

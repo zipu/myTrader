@@ -1,0 +1,80 @@
+<div class="account row">
+    <!-- ========= 여기부터 입출금내역 =========== -->
+    <div class="balance">
+        <h3>
+            <u>입출금 내역</u>
+        </h3>
+        <table class="table table-condensed table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th style='width:25%'>날짜</th>
+                    <th style='width:30%'>입금</th>
+                    <th style='width:30%'>출금</th>
+                    <th style='width:15%'></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let row of account">
+                    <td>{{row.date}}</td>
+                    <td>{{row.deposit? '&#x20A9; '+row.deposit.toLocaleString() : ''}}</td>
+                    <td>{{row.withdraw? '&#x20A9; '+row.withdraw.toLocaleString() : ''}}</td>
+                    <td><button type="submit" class="btn btn-default" (click)="removeItem(account.indexOf(row))" style="height:20px;padding-top:0">
+                        <i class="glyphicon glyphicon-trash" style="font-size: 12px;"></i>
+                        </button></td>
+                </tr>
+                <tr>
+                    <th>
+                        <input type="date" class="form-control" name="date" [(ngModel)]="new_balance.date">
+                    </th>
+                    <td>
+                        <input type="number" class="form-control" name="deposit" [(ngModel)]="new_balance.deposit">
+                    </td>
+                    <td>
+                        <input type="number" class="form-control" name="withdraw" [(ngModel)]="new_balance.withdraw">
+                    </td>
+                    <td>
+                        <button type="submit" class="btn btn-default" (click)="add_deposit()">
+                        <i class="glyphicon glyphicon-plus"></i></button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <table class="table table-condensed table-bordered" style="width:50%;">
+            <tr>
+                <th>잔액</th>
+                <td>{{total? '&#x20A9; '+total.toLocaleString(): ''}}</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- ========= 여기부터 환전내역 =========== -->
+    <div class="exchange">
+        <h3>
+            <u>환전 내역</u>
+        </h3>
+        <table class="table table-condensed table-bordered table-striped" style="margin-bottom:0">
+            <thead>
+                <tr>
+                    <th style='width:40%'>날짜</th>
+                    <th style='width:30%'>환전 금액</th>
+                    <th style='width:30%'>환전 후 금액</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let row of recordsList">
+                    <td style='width:5%' (click)="getRecord(row.index)">{{row.index}}</td>
+                    <td style='width:10%' (click)="getRecord(row.index)">{{row.entryDate}}</td>
+                    <td style='width:14%' (click)="getRecord(row.index)">{{row.product}}</td>
+                    <td style='width:6%' (click)="getRecord(row.index)">{{row.contracts}}</td>
+                    <td style='width:8%' (click)="getRecord(row.index)" [style.color]="row.position=='Long'? 'purple': 'green'">{{row.position}}</td>
+                    <td style='width:10%' (click)="getRecord(row.index)" [style.color]="row.profit > 0 ? 'blue': 'red'" class="dollar">{{row.profit}}</td>
+                    <td style='width:9%' (click)="getRecord(row.index)" [style.color]="row.ticks > 0 ? 'blue': 'red'">{{row.ticks}}</td>
+                    <td style='width:10%' (click)="getRecord(row.index)">{{row.tradingType}}</td>
+                    <td style='width:18%' (click)="getRecord(row.index)">{{row.strategy}}</td>
+                    <td style='width:10%' (click)="gotoOneNote(row.description)"><a *ngIf="row.description" style="cursor: pointer;">link</a></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>

@@ -1,0 +1,30 @@
+/* 호가 화면 */
+.chart-manager {
+    border-style: solid;   
+}
+
+.apply-btn {
+    display: block;
+    margin: auto;
+}
+
+.constatns {
+    text-align: center;
+    table-layout: fixed;
+    border-style: solid;
+        vertical-align: middle;
+    text-align: center;
+}
+.constants th{
+    width: 50%;
+    background-color: #f5f5f5;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.constants td{
+    vertical-align: middle;
+    text-align: center;
+    width: 50%;
+    height:38px;
+}

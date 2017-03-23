@@ -12,15 +12,13 @@ export class Products {
 
 
 export class Product {
+
+  // 종목 기본정보
   code: string; //종목코드
   name: string; //종목이름
   month: string; //월물
   isActive: boolean; //액티브 월물?
   isRecent: boolean; //최근 월물?
-  price: string; //가격
-  diff: string; //전일대비
-  volumn: string; //거래량
-  density: any; //density 데이터
   market: string;  //상품군
   groupname: string; //그룹네임 ex)CUR6A
   currency: string; //결재통화
@@ -32,12 +30,22 @@ export class Product {
   tickUnit: string; //틱 단위
   openTime: string; //장시작시간
   closeTime: string; //장종료시간
+  
+  //가격 정보
+  price: string; //가격
+  diff: string; //전일대비
+  volumn: string; //거래량
+  
+  //데이터
+  size: number;
+  
   constructor(code: string, name: string, month: string, groupname:string, market:string) {
     this.code = code;
     this.name = name;
     this.month = month;
     this.groupname = groupname;
     this.market = market;
+    this.size = 20; // 기본 매매 사이즈 --> 최적 매매 사이즈를 결정하도록 추후 변경
   }
 }
 
@@ -90,4 +98,17 @@ export class RecordInfo {
   public tickValue: string;
   public commission: number;
   public notation: number;
+}
+
+
+/***** Account Component *****/
+export class Balance {
+  public date: string;
+  public deposit: number;
+  public withdraw: number;
+  public description: string;
+
+  constructor(date:string){
+    this.date = date;
+  }
 }

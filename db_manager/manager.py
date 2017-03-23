@@ -21,10 +21,14 @@ def main():
         from PyQt5.QtWidgets import QApplication
         from update import Update
 
-        app = QApplication(sys.argv)
-        kiwoom = Update(args.update)
-        kiwoom.CommConnect(0)
-        sys.exit(app.exec_())
+        if args.update in ['marketinfo', 'OHLC', 'minute']:
+            app = QApplication(sys.argv)
+            kiwoom = Update(args.update)
+            kiwoom.CommConnect(0)
+            sys.exit(app.exec_())
+        else:
+            raise NameError(args.update)
+
 
     elif args.calc:
         from calc import Calc

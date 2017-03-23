@@ -87,7 +87,9 @@ export class CommonService {
           date: dd,
           hours: hours,
           minutes: minutes,
-          yyyymmdd: yyyy+mm+dd,
+          yyyymmdd: function(gubun='') { 
+                        return yyyy+gubun+mm+gubun+dd 
+                    },
           datetime: yyyy+'-'+mm+'-'+dd+'T'+hours+':'+minutes,
       }
     }

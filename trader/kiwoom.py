@@ -256,8 +256,8 @@ class Kiwoom(KiwoomAPI):
     ##                             Chart Screen                         ##
     ##                            (Screen : 0004)                       ##
     ######################################################################
-    @pyqtSlot(str, str, result=QVariant)
-    def get_density(self, market, group):
+    @pyqtSlot(str, str, int, result=QVariant)
+    def get_density(self, market, group, size):
         """
          db에서 density data를 로드하는 매소드
         """
@@ -266,24 +266,22 @@ class Kiwoom(KiwoomAPI):
 
         data = {
             'density' : self.density.T.tolist(),
-            'density_diff' : self.get_density_diff(5)
+            'density_diff' : self.get_density_diff(size)
         }
 
         return data
 
-
+    
     @pyqtSlot(int, result=QVariant)
     def get_density_diff(self, length):
         density = self.density[1]
         window = length*2 + 1
-        center = length + 1
+        center = length
         rolled = self.rolling_window(density, window)
         density_diff = np.apply_along_axis(self.calc_density_diff, 1, rolled, center=center)
         density_diff = np.concatenate([np.zeros(length), density_diff, np.zeros(length)])
         data = np.array([self.density[0], density_diff])
         return data.T.tolist()
-
-
 
 
     def rolling_window(self, arr, window):

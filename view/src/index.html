@@ -14,6 +14,7 @@
     new QWebChannel(qt.webChannelTransport, function(channel) {
       window.kiwoom = channel.objects.kiwoom; //kiwoom API 로드
       window.recordDB = channel.objects.record; //record API 로드
+      window.account = channel.objects.account; //account API 로드
     })
   </script>
 </head>

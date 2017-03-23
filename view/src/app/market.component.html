@@ -85,15 +85,14 @@
     </div>
     <div class="second row">
         <!-- 차트화면 -->
-        <div class="chart col-md-7">
+        <div class="chart col-md-12">
             <!-- <chart *ngIf="selectedProduct" [product]="selectedProduct"></chart> -->
-            <my-chart [product]="selectedProduct"></my-chart>
+            <my-chart *ngIf="selectedProduct" 
+                [product]="selectedProduct"
+                [kiwoom]="kiwoom">
+            </my-chart>
+        </div>
 
-        </div>
-        <!-- 호가정보 화면 -->
-        <div class="hoga col-md-5">
-            <p> test </p>
-        </div>
     </div>
     <!-- Modal Screen -->
     <div *ngIf="isModalOn" class="modal">

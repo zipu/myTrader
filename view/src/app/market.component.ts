@@ -78,7 +78,8 @@ export class MarketComponent{
   
   ngOnDestroy() {
   // 화면 넘어갈때 disconnect 안하면 background에서 계속 data 받고 있음 
-    //this.kiwoom.disconnect(this.screens.pList);
+    if (this.isConnected == true)
+      this.kiwoom.disconnect(this.screens.pList);
   }
 
 
@@ -290,9 +291,11 @@ export class MarketComponent{
   selectProduct(code:string){
     //this.selectedProduct = new Product(product[0], product[1], product[2]);
     this.selectedProduct = this.products.list[code];
-
     this.kiwoom.getProductInfo(code); //onProductInfo에서 receive
-    this.getDensityData(this.selectedProduct);
+
+    setTimeout(()=>{  
+      this.getDensityData(this.selectedProduct);
+    },100);
     this.commonService.logging('selected product', this.selectedProduct);
   }
   
@@ -308,35 +311,15 @@ export class MarketComponent{
   *                        차트 데이터 처리(screen = pInfo)          *
   ******************************************************************/
   getDensityData(product:Product){
+
     let market = product.market;
     let group = product.groupname;
-    this.kiwoom.get_density(market, group)
+    let size = product.size;
+    this.kiwoom.get_density(market, group, size)
       .then( (data:any) => {
-        this.selectedProduct.density = data;
-        console.log(data);
+        //this.selectedProduct.density = data;
         this.chartComponent.drawDensityChart(data);
     });
-  }
-
-
-
-  onChartData(dataString:any) {
-    let data = dataString.match(/\S+/g);
-    let chart_data:number[][] = [];
-    for (let i=0; i< data.length/7; i++) {
-      let temp:number[] = [];
-      let date:any = data[4+i*7];
-
-      temp[0] = +data[i*7];
-      temp[1] = +data[i*7+1];
-      temp[2] = +data[i*7+2];
-      temp[3] = +data[i*7+3];
-      temp[4] = new Date(date.slice(0,4),date.slice(4,6),date.slice(6,8)).getTime();
-      temp[5] = +data[i*7+5];
-      chart_data.push(temp);
-    };
-  
-    this.chartComponent.updateChart()
   }
   
   /******************************************************************
@@ -350,7 +333,11 @@ export class MarketComponent{
         this.products.list[code]['diff'] = realdata[4]; //전일대비
         this.ref.detectChanges();
       } 
-      //this.commonService.logging("Realdata", this.products);
+      console.log(realdata)
+      if (typeof this.selectedProduct !== 'undefined' && code == this.selectedProduct.code){
+        this.chartComponent.setPriceOnChart();
+      }
+      
   }
   
   onReceiveMsg(msg:any) {
